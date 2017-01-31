@@ -1,13 +1,3 @@
-
-
-
-
-
-
-
-
-
-
 ## UELD ---- Usermode Environment Loader Daemon
 
 Switch language: [简体中文](README.zh_CN.md)
@@ -49,9 +39,7 @@ If you first install Ueld, then the Ueld configuration file is set to create `ge
 
 - Ueld is very lightweight and simple, "small is both beautiful". The huge software is always uncomfortable, so I try to avoid Ueld becoming a huge software.
 
-- 我尽力使 Ueld 仅提供 init 该提供的一系列原语操作，尽力做到 “提供机制，而不是策略”，行为的最终逻辑由用户制定，使其具有很强的灵活性。
-
-	例如，ueld 绝对不会在加载系统时解析 `/etc/fstab` 配置文件，也绝对不会在启动时运行任何 `/etc/rcX.d/` 系统服务，而是在启动时运行一个 `/etc/ueld/sysinit.sh` 脚本，系统加载完毕后在后台不等待得运行 `/etc/ueld/sysloaded.sh` 脚本，并解析 `/etc/ueld/restarts.list` 文件以启动这些需要退出后需要立刻重新启动的程序（通常是 `getty(8)`），系统关机前运行 `/etc/ueld/syshalt.sh` 脚本，没错，ueld 不给用户强加任何策略！让用户有能力自主决定开机时准备什么等等，例如，用户可以在 sysinit.sh 中启动 `udevd(8)` 守护进程，可以通过脚本解析 `/etc/fstab` 并使用 `mount(8)` 挂载文件系统（简单情况下其实直接 mount 就好），可以使用 `modprobe(8)` 加载内核模块，可以使用 `ifconfig(8)` 等配置网卡...；可以在 sysloaded.sh 中打开一个 X Server，启动自己的实用程序...，当然也可以不这样或按照自己喜欢的方式编制了，一切的一切都可以由用户自己决定。
+- 我尽力使 Ueld 仅提供 init 该提供的一系列原语操作，尽力做到 “提供机制，而不是策略”。通过用户可编辑的脚本，将系统启动，关机时的具体策略交由不同的软件去完成，所有行为的最终逻辑可由用户根据他们自己的需要制定，使其具有很强的灵活性。
 
 - Ueld 特别适用于像树莓派这样的设备，或者对开机速度特别在意的人。实际上，我就是在一种“类树莓派”板卡----NanoPi 2Fire 上开发 ueld 的。在该设备上使用 Debian 8 系统，用 ueld 替换 systemd 后，开机速度提升了 10-20 倍！！（这太令我感到惊讶了）
 
