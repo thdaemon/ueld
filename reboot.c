@@ -133,7 +133,7 @@ int ueld_reboot(int cmd)
 		char* sh = ueld_readconfig("system_shell");
 		if (!sh) sh = "/bin/sh";
 		ueld_run(sh, 0, 0, NULL);
-		ueld_freeconfig(sh);
+
 		return -1;
 	}
 

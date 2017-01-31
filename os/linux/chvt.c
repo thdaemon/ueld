@@ -24,7 +24,7 @@ int ueld_os_chvt(int vt)
 
 	/*if ((fd = open("/dev/console", O_RDONLY)) < 0)
 		return -1;*/
-	fd = STDIN_FILENO; /* FIX ME: Use stdin */
+	fd = STDIN_FILENO; /* FIXME: I use stdin, is it a good way? */
 
 	setconsole(fd, vt);
 

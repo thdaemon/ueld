@@ -16,7 +16,6 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status);
 
 char* ueld_readconfig(char* name);
 long ueld_readconfiglong(char* name, long defaultval);
-void ueld_freeconfig(char* value);
 void ueld_closeconfig();
 
 #endif // __TOOLS_H_
