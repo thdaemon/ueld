@@ -1,8 +1,3 @@
-
-
-
-
-
 #define _GNU_SOURCE
 
 #include <stdio.h>
@@ -27,8 +22,11 @@ struct restart_app {
 	char* cmd;
 };
 
-struct restart_app apps[MAX_APP];
-unsigned int appssz = 0;
+static struct restart_app apps[MAX_APP];
+static unsigned int appssz = 0;
+
+static size_t length;
+static char* restarts;
 
 static void runapp(struct restart_app* app)
 {
@@ -47,8 +45,7 @@ static void runapp(struct restart_app* app)
 void restarts_init()
 {
 	int fd;
-	size_t length;
-	char *restarts, *p, *vt, *cmd;
+	char *p, *vt, *cmd;
 
 	if ((fd = open(RESTARTS_FILE, O_RDONLY)) < 0)
 		return;
@@ -102,6 +99,11 @@ void restartpid(pid_t pid)
 
 void clearpid(pid_t pid)
 {
+	if (pid == 0) {
+		munmap(restarts, length);
+		appssz = 0;
+	}
+
 	for (int i = 0; i < appssz; i++) {
 		if (apps[i].pid == pid) {
 			apps[i].pid = 0;

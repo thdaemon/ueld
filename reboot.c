@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 #define _POSIX_C_SOURCE 200819L
 #define _XOPEN_SOURCE 700
 #define _GNU_SOURCE
@@ -22,11 +13,13 @@
 #include <signal.h>
 #include <errno.h>
 #include <sys/mount.h>
+#include <sys/wait.h>
 
 #include "os/pw.h"
 #include "os/chvt.h"
 #include "readline.h"
 #include "tools.h"
+#include "restarts.h"
 
 #define MOUNTS "/proc/self/mounts"
 
@@ -91,6 +84,9 @@ int ueld_reboot(int cmd)
 
 	ueld_os_chvt(1);
 
+	clearpid(0);
+	ueld_closeconfig();
+
 	ueld_echo("Sending SIGTERM to all process...");
 	killproc(SIGTERM);
 
@@ -102,6 +98,10 @@ int ueld_reboot(int cmd)
 	killproc(SIGKILL);
 
 	ueld_os_chvt(1);
+
+	int status;
+	pid_t pid;
+	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {}
 
 	ueld_echo("Running syshalt.sh...");
 	ueld_run("/etc/ueld/syshalt.sh", URF_WAIT, 0, NULL);

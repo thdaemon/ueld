@@ -1,9 +1,3 @@
-
-
-
-
-
-
 UELD_OS := unkown
 include version
 
