@@ -43,7 +43,7 @@
 
 #define MAX_ARGS 32
 
-char* config;
+char* config = NULL;
 size_t config_length;
 
 void* ueld_signal(int signum, void* handler, int restartsyscall)
@@ -212,7 +212,7 @@ char* ueld_readconfig(char* name)
 	}
 
 	p = strstr(config, name);
-	if (!p) return NULL;
+	if (!p || *p == 0) return NULL;
 
 	end = strchrnul(p, '\n');
 	*end = 0;

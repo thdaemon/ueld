@@ -112,12 +112,24 @@ int ueld_reboot(int cmd)
 		return -1;
 	}
 
+	int hasumountfs = 0;
+
 	while (readline(fd, s, sizeof(s)) > 0) {
-		ueld_umount(s);
+		if (ueld_umount(s) < 0)
+			hasumountfs = 1;
 		//system("echo -n \"u\" > /proc/sysrq-trigger");
 	}
 
 	close(fd);
+
+	if (hasumountfs && ueld_readconfiglong("ueld_must_remount_before_poweroff", -1) == 1) {
+		ueld_echo("Remount some filesystems failed, drop to a shell...");
+		char* sh = ueld_readconfig("system_shell");
+		if (!sh) sh = "/bin/sh";
+		ueld_run(sh, 0, 0);
+		ueld_freeconfig(sh);
+		return -1;
+	}
 
 	ueld_echo("Doing poweroff...");
 	if (ueld_os_reboot(cmd) < 0)

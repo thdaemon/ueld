@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
 	char* press_keys = ueld_readconfig("ueld_muti_init_press_keys");
 	if (!press_keys) press_keys = "sS";
 
-	if (strchr(press_keys, c) && !timeout) {
+	if ((c != '\0') && strchr(press_keys, c) && !timeout) {
 		ueld_freeconfig(press_keys);
 		char* other_init = ueld_readconfig("ueld_muti_init_other_init");
 		if (other_init)

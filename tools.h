@@ -1,3 +1,6 @@
+#ifndef __TOOLS_H_
+#define __TOOLS_H_
+
 void* ueld_signal(int signum, void* handler, int restartsyscall);
 int ueld_unblock_signal(int signum);
 int ueld_block_signal(int signum);
@@ -14,3 +17,5 @@ char* ueld_readconfig(char* name);
 long ueld_readconfiglong(char* name, long defaultval);
 void ueld_freeconfig(char* value);
 void ueld_closeconfig();
+
+#endif // __TOOLS_H_
