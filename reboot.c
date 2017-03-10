@@ -24,6 +24,7 @@
 #include <sys/mount.h>
 
 #include "os/pw.h"
+#include "os/chvt.h"
 #include "readline.h"
 #include "tools.h"
 
@@ -88,14 +89,19 @@ int ueld_reboot(int cmd)
 		return -1;
 	}
 
+	ueld_os_chvt(1);
+
 	ueld_echo("Sending SIGTERM to all process...");
 	killproc(SIGTERM);
 
+	ueld_os_chvt(1);
 	sleep(2);
 
 	ueld_echo("Sending SIGKILL to all process...");
 	killproc(SIGKILL);
 	killproc(SIGKILL);
+
+	ueld_os_chvt(1);
 
 	ueld_echo("Running syshalt.sh...");
 	ueld_run("/etc/ueld/syshalt.sh", URF_WAIT, 0, NULL);

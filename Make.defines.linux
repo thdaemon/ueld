@@ -1,0 +1,2 @@
+UELD_OS := linux
+UELD_OS_CFLAGS := -DLINUX

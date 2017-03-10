@@ -7,17 +7,22 @@
 UELD_OS := unkown
 include version
 
+ifeq "$(PLATFORM)" ""
+ PLATFORM := $(shell ./systype.sh)
+endif
+include Make.defines.$(PLATFORM)
+
 
 PREFIX :=
 INSTALLDIR := /usr/local/sbin/ueld/ueld-$(UELD_VERSION)
 ETCDIR := $(PREFIX)/etc/ueld
 
-OBJS := main.o minit.o readline.o reboot.o tools.o restarts.o os/$(UELD_OS)/pw.o
+OBJS := main.o minit.o readline.o reboot.o tools.o restarts.o os/$(UELD_OS)/pw.o os/$(UELD_OS)/chvt.o os/$(UELD_OS)/ctrlaltdel.o
 CROSS :=
 CC := gcc
 STRIP := strip
 
-CFLAG := -Wall -O2 -std=c99 $(UELD_C_DEF)
+CFLAG := -Wall -O2 -std=c99 $(UELD_OS_CFLAGS)
 
 all : ueld
 

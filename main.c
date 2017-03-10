@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 #ifdef LINUX
 #include <sys/prctl.h>
@@ -26,20 +27,21 @@
 
 #include "reboot.h"
 #include "os/pw.h"
+#include "os/ctrlaltdel.h"
 #include "tools.h"
 #include "restarts.h"
 
-void sig_term(int signo)
+static void sig_term(int signo)
 {
 	ueld_reboot(UELD_OS_PW_POWER_OFF);
 }
 
-void sig_hup(int signo)
+static void sig_hup(int signo)
 {
 	ueld_reboot(UELD_OS_PW_REBOOT);
 }
 
-void sig_user1(int signo)
+static void sig_user1(int signo)
 {
 	ueld_closeconfig();
 	char* path = ueld_readconfig("ueld_execfile");
@@ -52,6 +54,13 @@ void sig_user1(int signo)
 	ueld_freeconfig(path);
 }
 
+/* this function will be called when press ctrl-alt-del on a vt. */
+static void cad_handler()
+{
+	ueld_echo("Handle Ctrl-Alt-Del, runing /etc/ueld/ctrlaltdel.sh...");
+	ueld_run("/etc/ueld/ctrlaltdel.sh", URF_WAIT, 0, NULL);
+}
+
 int ueld_main(int argc, char* argv[])
 {
 	int status;
@@ -62,11 +71,14 @@ int ueld_main(int argc, char* argv[])
 	}
 	
 	ueld_unblock_signal(SIGUSR1);
-	
+
+	if (ueld_os_handle_ctrl_alt_del(cad_handler) < 0)
+		ueld_print("Warning: Could not handle ctrl-alt-del, %s", strerror(errno));
+
 	ueld_signal(SIGTERM, &sig_term, 1);
 	ueld_signal(SIGHUP, &sig_hup, 1);
 	ueld_signal(SIGUSR1, &sig_user1, 1);
-	
+
 	if (argc > 0 && (strcmp(argv[0], "-ueld") != 0)) {
 		ueld_run("/etc/ueld/sysinit.sh", URF_WAIT, 0, NULL);
 		restarts_init();

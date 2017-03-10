@@ -211,9 +211,6 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 	
 	/* parent */
 	if (flag & URF_WAIT) {
-		sigaction(SIGINT, &save_intr, NULL);
-		sigaction(SIGQUIT, &save_quit, NULL);
-
 		if (pid > 0) {
 			while (waitpid(pid, &status, 0) != pid) {
 				if (errno != EINTR) {
@@ -225,6 +222,9 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 			if (wait_status)
 				*wait_status = status;
 		}
+
+		sigaction(SIGINT, &save_intr, NULL);
+		sigaction(SIGQUIT, &save_quit, NULL);
 	}
 
 	ueld_unblock_signal(SIGCHLD);
