@@ -46,7 +46,7 @@ install : ueld
 
 	mkdir -p $(ETCDIR)
 	cp -n etcfiles/* $(ETCDIR)/
-	touch $(ETCDIR)/sysinit.sh $(ETCDIR)/sysloaded.sh $(ETCDIR)/syshalt.sh $(ETCDIR)/ueld.conf $(ETCDIR)/restarts.list
+	touch $(ETCDIR)/*
 	chmod 755 $(ETCDIR)/*.sh
 
 	cp usertool/ueldctl $(PREFIX)$(INSTALLDIR)/ueldctl

@@ -24,7 +24,7 @@ $ sudo make install
 
 可使用 `PREFIX` 变量设置根文件系统，可使用 `INSTALLDIR` 变量设置安装目录。
 
-####交叉编译
+**交叉编译**
 
 如果你希望交叉编译 Ueld，那么你可以使用 `CROSS` 变量设置交叉编译器，例如交叉编译器为 arm-linux-gnueabihf-，你可以
 
@@ -34,62 +34,32 @@ $ make CROSS=arm-linux-gnueabihf-
 
 ####配置和使用 Ueld
 
-在安装后建议立刻配置 Ueld，参考 [此 Wiki]()
+在安装后建议立刻配置 Ueld，参考 [此 Wiki](doc/zh_CN/userguide.md)
 
-Ueld 使用手册也包含在这篇 Wiki 中。
+**Ueld 使用手册也包含在这篇 Wiki 中；**卸载说明也包含在此 Wiki 中。
 
 如果你第一次安装 Ueld，那么 Ueld 配置文件被设置为在 tty1-5 上创建 `getty(8)` 等待登录，这可能不适合你的情况，因此，不要忘记配置它。值得注意的是，安装 Ueld 时，如果相应目录已经存在配置文件，也不会覆盖之前的配置文件，即使新版本的缺省配置可能发生变化。
 
-####卸载 Ueld
-
-1. 删除安装 Ueld 时设置的安装目录(默认为 ${PREFIX}/usr/local/sbin/ueld/ueld-${UELD_VERSION})，一级配置文件 ${PREFIX}/etc/ueld/ 目录
-
-	```
-	# rm -r ${PREFIX}/etc/ueld
-	# rm -r where-you-install-ueld
-	```
-
-2. 删除软链接 /sbin/init 和 /sbin/ueldctl，（如果有必要）并将 /sbin/init 设置为新 init 程序的软链接
-
-	```
-	# rm /sbin/init /sbin/ueldctl
-	# ln -s the-path-of-new-init /sbin/init
-	```
-
-3. （如果是在本机上为当前正在运行的系统卸载 Ueld，那么）卸载 Ueld 会导致这一次关机遇到麻烦，但目前没有更好的选择，一种方法是直接关机
-
-	```
-	# kill -TERM 1
-	```
-
-	由于 ueldctl 实用程序已经被删除，因此我们得使用 `kill(1)` 命令给 ueld 发送信号。
-
-	但这样会导致下一次开机时 `fsck(8)` 实用程序检查文件系统，因为删除 ueld 程序后，ueld 的进程 (pid 1) 无法退出或加载其他程序，使得 ueld 所在的文件系统无法卸载或重载为只读。（ueld 关机时会调用 `sync(2)` 系统调用同步文件系统，因此不会导致数据丢失）
-
-	另一种方法是让 ueld 加载一个其他的 init 程序，由于配置文件已经被删除，因此 ueld 使用缺省配置 /sbin/init，确保他可用后，执行
-
-	```
-	# ls -l /sbin/init
-	lrwxrwxrwx 1 root root 20 Jan 7 12:14 /sbin/init -> /lib/systemd/systemd
-	# kill -USR1 1
-	```
-
-	但这种方法的代价是新的 init 程序很可能启动系统服务等，因此最好的方法是关闭一切应该关闭的东西，并在 tty8 等不太可能用到的虚拟控制台上执行。
-
-	如果是为另一个系统卸载 Ueld，例如，情况是嵌入式设备准备的根文件系统，那么不需要此步。
-
 ####Ueld 的优点
 
-- Ueld 非常轻量级，符合 Unix 哲学“小既是美”，作者也是 KISS 哲学的坚定支持者。
+- Ueld 非常轻量级和简洁，“小既是美”。庞大的东西总是让人很不舒服，因此我尽力避免 Ueld 成为庞大的软件。
 
-- Ueld 仅提供 init 该提供的一系列原语操作，提供“机制，而不是策略”，行为的最终逻辑由用户制定，具有很强的灵活性。Ueld 不像 systemd 一样什么都大包大揽，而是使不同的功能分割给不同的软件包，他们之间使用用户编写的脚本和配置文件连接，从而给用户提供了无与伦比的自由。
+- 我尽力使 Ueld 仅提供 init 该提供的一系列原语操作，尽力做到 “提供机制，而不是策略”，行为的最终逻辑由用户制定，使其具有很强的灵活性。
 
-	例如，ueld 绝对不会在加载系统时解析 `/etc/fstab` 配置文件，也绝对不会在启动时运行任何 `/etc/rcX.d/` 系统服务，而是在启动时运行一个 `/etc/ueld/sysinit.sh` 脚本，系统加载完毕后在后台不等待得运行 `/etc/ueld/sysloaded.sh` 脚本，并解析 `/etc/ueld/restarts.list` 文件以启动这些需要退出后需要立刻重新启动的程序（通常是 `getty(8)`），系统关机前运行 `/etc/ueld/syshalt.sh` 脚本，没错，ueld 不给用户强加任何策略！让用户有能力自主决定开机时准备什么等等，例如，用户可以在 sysinit.sh 中启动 `udev(7)` 程序，可以通过脚本解析 `/etc/fstab` 并使用 `mount(8)` 挂载文件系统（简单情况下其实直接 mount 就好），可以使用 `modprobe(8)` 加载内核模块，可以使用 `ifconfig(8)` 等配置网卡...；可以在 sysloaded.sh 中打开一个 X Server，启动自己的实用程序...，当然也可以不这样或按照自己喜欢的方式编制了，一切的一切都可以由用户自己决定。
+	例如，ueld 绝对不会在加载系统时解析 `/etc/fstab` 配置文件，也绝对不会在启动时运行任何 `/etc/rcX.d/` 系统服务，而是在启动时运行一个 `/etc/ueld/sysinit.sh` 脚本，系统加载完毕后在后台不等待得运行 `/etc/ueld/sysloaded.sh` 脚本，并解析 `/etc/ueld/restarts.list` 文件以启动这些需要退出后需要立刻重新启动的程序（通常是 `getty(8)`），系统关机前运行 `/etc/ueld/syshalt.sh` 脚本，没错，ueld 不给用户强加任何策略！让用户有能力自主决定开机时准备什么等等，例如，用户可以在 sysinit.sh 中启动 `udevd(8)` 守护进程，可以通过脚本解析 `/etc/fstab` 并使用 `mount(8)` 挂载文件系统（简单情况下其实直接 mount 就好），可以使用 `modprobe(8)` 加载内核模块，可以使用 `ifconfig(8)` 等配置网卡...；可以在 sysloaded.sh 中打开一个 X Server，启动自己的实用程序...，当然也可以不这样或按照自己喜欢的方式编制了，一切的一切都可以由用户自己决定。
 
-	这就是 Ueld 坚守的设计信念，当然不是 Ueld 自创的，而是大多数 Unix 黑客一贯的设计作风，最终用户永远比软件设计者更明白自己需要的究竟是什么。
+- Ueld 特别适用于像树莓派这样的设备，或者对开机速度特别在意的人。实际上，我就是在一种“类树莓派”板卡----NanoPi 2Fire 上开发 ueld 的。在该设备上使用 Debian 8 系统，用 ueld 替换 systemd 后，开机速度提升了 10-20 倍！！（这太令我感到惊讶了）
 
-	另一方面，这也增强了透明性，Ueld 使系统开关机都是十分透明的，没有隐藏在阴影下的深度。
+- 最后一个，也是一个 Ueld 独有的、在大多数情况下没什么用、但有时可能挺实用的小功能，我把它叫做”Muti Init“，他允许你将 Ueld 配置为开机时选择加载哪一个 init 程序，ueld，sysvinit，还是 systemd。（PC 的用户或许会嘲笑我可以在 grub 中添加几个条目，他们使用不同的 init=xxx 内核启动参数，但是必须提到的是，像 NanoPi 这种设备，通过重刷 u-boot 来修改一次修改启动参数是一件苦差事）
 
-- Ueld 特别适用于像树莓派这样的设备，或者对开机速度特别在意的人。实际上，我就是在一种“类树莓派”板卡----NanoPi 2Fire 上开发 ueld 的。在该设备上使用 Debian 8 系统，用 ueld 替换 systemd 后，开机速度提升了近20倍！！（这太令我感到惊讶了）
+####Ueld 目前的问题
 
-- 最后一个，也是一个 Ueld 独有的、在大多数情况下没什么用、但有时可能挺实用的小功能，我把它叫做”Muti Init“，他允许你将 Ueld 配置为开机时选择加载哪一个 init 程序，ueld，sysvinit，还是 systemd。（PC 的用户或许会嘲笑我可以在 grub 中添加几个条目，他们使用不同的 init=xxx 内核启动参数，但是必须提到的是，像 NanoPi 这种设备，没人愿意通过重刷 u-boot 来仅仅是修改一次修改启动参数）
+- Ueld 目前仅支持 Linux 系统，不过，绝大部分移植层代码都放置在 os/ 子目录中，其他代码也考虑到了移植问题（例如 BSD 上需要用 ioctl(2) 设置控制终端），因此可以移植到其他 Unix 系统，但 init 程序本身的特性决定了不同平台的代码必须存在大量差异，移植需要一定的工作。
+
+- Ueld 目前不支持命令行和配置文件中转义字符和引号
+
+- Ueld 目前使用了多个信号处理各种 ueldctl 命令，更好的方案是像 telinit 那样
+
+- Ueld 目前不支持带参数重启
+
+- Ueld 目前不能优雅得与现有桌面环境进行整合
