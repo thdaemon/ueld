@@ -1,0 +1,56 @@
+#!/bin/sh
+
+usage() {
+	cat << EOL
+Usage: $0 [options]
+  Control the ueld init daemon.
+  This tool can help you to poweroff or reboot the machine, reload the init daemon, etc.
+
+  OPTIONS
+   -p, --poweroff		Power-off this machine.
+   -r, --reboot			Reboot this machine.
+   -l, --reload-init		Reload the init daemon.
+   -h, --help 			Show this usage.
+EOL
+}
+
+SIGNAL=''
+
+if [ "$0" = 'reboot' ]; then
+	SIGNAL='-HUP'
+elif [ "$0" = 'poweroff' ]; then
+	SIGNAL='-TERM'
+fi
+
+for _tag in `seq $#` ; do
+	case "$1" in 
+	-h|--help)
+		usage
+		exit 0
+		;;
+	-p|--poweroff)
+		SIGNAL='-TERM'
+		shift
+		;;
+	-r|--reboot)
+		SIGNAL='-HUP'
+		shift
+		;;
+	-l|--reload-init)
+		SIGNAL='-USR1'
+		shift
+		;;
+	*)
+		break
+		;;
+	esac
+done
+
+if [ "$SIGNAL" = '' ]; then
+	exit 0
+fi
+
+if ! kill $SIGNAL 1 ; then
+	echo "Failed to call init. Do you use the ueld?" >&2
+fi
+

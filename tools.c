@@ -1,0 +1,255 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define _POSIX_C_SOURCE 200819L
+#define _XOPEN_SOURCE 700
+#define _GNU_SOURCE
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <errno.h>
+#include <sys/mman.h>
+#include <sys/ioctl.h>
+
+#include "tools.h"
+
+#define MAX_ARGS 32
+
+char* config;
+size_t config_length;
+
+void* ueld_signal(int signum, void* handler, int restartsyscall)
+{
+	struct sigaction sa, osa;
+
+	sa.sa_handler = handler;
+	sigemptyset(&sa.sa_mask);
+	if (restartsyscall) {
+		sa.sa_flags = SA_RESTART;
+	} else {
+#ifdef SA_INTERRUPT
+		sa.sa_flags = SA_INTERRUPT;
+#endif
+	}
+	if(sigaction(signum, &sa, &osa) < 0)
+		return (void*) -1;
+	return osa.sa_handler;
+}
+
+int ueld_unblock_signal(int signum)
+{
+	sigset_t set, oset;
+	sigemptyset(&set);
+	sigaddset(&set, signum);
+	return sigprocmask(SIG_UNBLOCK, &set, &oset);
+}
+
+int ueld_block_signal(int signum)
+{
+	sigset_t set, oset;
+	sigemptyset(&set);
+	sigaddset(&set, signum);
+	return sigprocmask(SIG_BLOCK, &set, &oset);
+}
+
+void ueld_echo(char* msg)
+{
+	printf("[ueld] %s\n", msg);
+}
+
+void ueld_print(char* fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	
+	write(STDOUT_FILENO, "[ueld] ", 7);
+	vprintf(fmt, ap);
+	
+	va_end(ap);
+}
+
+pid_t ueld_run(char* file, int flag, int vt)
+{
+	pid_t pid;
+	int status;
+
+	ueld_block_signal(SIGCHLD);
+
+	if ((pid = fork()) == 0) {
+		ueld_unblock_signal(SIGCHLD);
+
+		if (flag & URF_NOOUTPUT) {
+			close(STDIN_FILENO);
+			close(STDOUT_FILENO);
+			close(STDERR_FILENO);
+
+			int fd0 = open("/dev/null", O_RDWR);
+			int fd1 = dup(fd0);
+			int fd2 = dup(fd0);
+
+			if((fd0 != STDIN_FILENO) || (fd1 != STDOUT_FILENO) || (fd2 != STDERR_FILENO)){
+				ueld_print("Could not run %s : Unexcept file discriptor number.\n", file);
+				_exit(EXIT_FAILURE);
+			}
+		}
+
+		if (flag & URF_SETVT) {
+			int fd0, fd1, fd2;
+			char devname[256];
+
+			close(STDIN_FILENO);
+			close(STDOUT_FILENO);
+			close(STDERR_FILENO);
+
+			setsid();
+
+			snprintf(devname, sizeof(devname), "/dev/tty%d", vt);
+			if((fd0 = open(devname, O_RDWR)) < 0) {
+				ueld_print("Could not run '%s': Open vt '%s' error (%s)\n", file, devname, strerror(errno));
+				_exit(EXIT_FAILURE);
+			}
+
+			fd1 = dup(fd0);
+			fd2 = dup(fd0);
+
+			if((fd0 != STDIN_FILENO) || (fd1 != STDOUT_FILENO) || (fd2 != STDERR_FILENO)){
+				ueld_print("Could not run '%s': Unexcept file discriptor number.\n", file);
+				_exit(EXIT_FAILURE);
+			}
+
+#ifdef BSD
+			if (ioctl(fd0, TIOCSCTTY, (char*)vt) < 0) {
+				ueld_print("Could not run '%s': Set control tty error (%s)\n", file, strerror(errno));
+				_exit(EXIT_FAILURE);
+			}
+#endif
+		}
+		
+		if (flag & URF_CMDLINE) {
+			char* args[MAX_ARGS + 1];
+			char* ptr;
+			int argssz = 0;
+
+			ptr = malloc(strlen(file) + 1);
+			strcpy(ptr, file);
+			while (*ptr != 0) {
+				if (argssz > (MAX_ARGS - 1))
+					break;
+				args[argssz++] = ptr;
+				ptr = strchr(ptr, ' ');
+
+				if (!ptr || *ptr == 0) break;
+				*ptr = 0;
+				ptr++;
+			}
+
+			args[argssz++] = 0;
+			execvp(args[0], args);
+			free(ptr);
+		} else {
+			execl(file, file, 0);
+		}
+		ueld_print("Could not run '%s': execl failed(%s)\n", file, strerror(errno));
+		_exit(EXIT_FAILURE);
+	}
+	
+	/* parent */
+	if ((flag & URF_WAIT) && (pid > 0))
+		waitpid(pid, &status, 0);
+
+	ueld_unblock_signal(SIGCHLD);
+	
+	return pid;
+}
+
+char* ueld_readconfig(char* name)
+{
+	char *p, *value, *end;
+
+	if (!config) {
+		int fd;
+
+		if ((fd = open("/etc/ueld/ueld.conf", O_RDONLY)) < 0)
+			return NULL;
+		config_length = lseek(fd, 0, SEEK_END) + 1;
+		config = mmap(NULL, config_length, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+
+		if (!config) {
+			close(fd);
+			return NULL;
+		}
+
+		config[config_length - 1] = '\n';
+		close(fd);
+	}
+
+	p = strstr(config, name);
+	if (!p) return NULL;
+
+	end = strchrnul(p, '\n');
+	*end = 0;
+
+	value = strchr(p, '=');
+	if (!value || *value == 0) {
+		*end = '\n';
+		return NULL;
+	}
+	value++;
+
+	return value;
+}
+
+long ueld_readconfiglong(char* name, long defaultval)
+{
+	long i = defaultval;
+
+	char* value = ueld_readconfig(name);
+	if (value) {
+		i = atol(value);
+		ueld_freeconfig(value);
+	}
+	
+	return i;
+}
+
+void ueld_freeconfig(char* value)
+{
+	if (value)
+		*strchrnul(value, '\n') = '\n';
+}
+
+void ueld_closeconfig()
+{
+	if (config) {
+		if (munmap(config, config_length) == 0)
+			config = NULL;
+	}
+}
