@@ -98,7 +98,7 @@ int ueld_reboot(int cmd)
 	killproc(SIGKILL);
 
 	ueld_echo("Running syshalt.sh...");
-	ueld_run("/etc/ueld/syshalt.sh", URF_WAIT, 0);
+	ueld_run("/etc/ueld/syshalt.sh", URF_WAIT, 0, NULL);
 
 	ueld_echo("Syncing disk...");
 	sync();
@@ -123,10 +123,10 @@ int ueld_reboot(int cmd)
 	close(fd);
 
 	if (hasumountfs && ueld_readconfiglong("ueld_must_remount_before_poweroff", -1) == 1) {
-		ueld_echo("Remount some filesystems failed, drop to a shell...");
+		ueld_echo("Remount some filesystems failed, droping to a shell...");
 		char* sh = ueld_readconfig("system_shell");
 		if (!sh) sh = "/bin/sh";
-		ueld_run(sh, 0, 0);
+		ueld_run(sh, 0, 0, NULL);
 		ueld_freeconfig(sh);
 		return -1;
 	}

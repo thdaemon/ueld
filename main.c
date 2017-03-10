@@ -20,6 +20,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#ifdef LINUX
+#include <sys/prctl.h>
+#endif // LINUX
+
 #include "reboot.h"
 #include "os/pw.h"
 #include "tools.h"
@@ -64,10 +68,14 @@ int ueld_main(int argc, char* argv[])
 	ueld_signal(SIGUSR1, &sig_user1, 1);
 	
 	if (argc > 0 && (strcmp(argv[0], "-ueld") != 0)) {
-		ueld_run("/etc/ueld/sysinit.sh", URF_WAIT, 0);
+		ueld_run("/etc/ueld/sysinit.sh", URF_WAIT, 0, NULL);
 		restarts_init();
-		ueld_run("/etc/ueld/sysloaded.sh", URF_NOOUTPUT, 0);
+		ueld_run("/etc/ueld/sysloaded.sh", URF_NOOUTPUT, 0, NULL);
 	}
+
+#ifdef LINUX
+	prctl(PR_SET_NAME, "ueld", 0, 0);
+#endif // LINUX
 	
 	ueld_closeconfig();
 	

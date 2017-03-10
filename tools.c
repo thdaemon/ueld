@@ -96,15 +96,43 @@ void ueld_print(char* fmt, ...)
 	va_end(ap);
 }
 
-pid_t ueld_run(char* file, int flag, int vt)
+pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 {
 	pid_t pid;
 	int status;
+	struct sigaction ignore, save_intr, save_quit;
 
-	ueld_block_signal(SIGCHLD);
+	if (file == NULL)
+		return -1;
+
+	if (ueld_block_signal(SIGCHLD) < 0)
+		return -1;
+
+	if (flag & URF_WAIT) {
+		ignore.sa_handler = SIG_IGN;
+		sigemptyset(&ignore.sa_mask);
+		ignore.sa_flags = 0;
+
+		if (sigaction(SIGINT, &ignore, &save_intr) < 0) {
+			ueld_unblock_signal(SIGCHLD);
+			return -1;
+		}
+		if (sigaction(SIGQUIT, &ignore, &save_quit) < 0) {
+			sigaction(SIGINT, &save_intr, NULL);
+			ueld_unblock_signal(SIGCHLD);
+			return -1;
+		}
+	}
 
 	if ((pid = fork()) == 0) {
 		ueld_unblock_signal(SIGCHLD);
+
+		if (flag & URF_SETSID) {
+			if (setsid() == -1) {
+				ueld_print("Could not run '%s': Setsid failed (%s)\n", file, strerror(errno));
+				_exit(EXIT_FAILURE);
+			}
+		}
 
 		if (flag & URF_NOOUTPUT) {
 			close(STDIN_FILENO);
@@ -116,7 +144,7 @@ pid_t ueld_run(char* file, int flag, int vt)
 			int fd2 = dup(fd0);
 
 			if((fd0 != STDIN_FILENO) || (fd1 != STDOUT_FILENO) || (fd2 != STDERR_FILENO)){
-				ueld_print("Could not run %s : Unexcept file discriptor number.\n", file);
+				ueld_print("Could not run '%s': Unexcept file discriptor number.\n", file);
 				_exit(EXIT_FAILURE);
 			}
 		}
@@ -182,12 +210,46 @@ pid_t ueld_run(char* file, int flag, int vt)
 	}
 	
 	/* parent */
-	if ((flag & URF_WAIT) && (pid > 0))
-		waitpid(pid, &status, 0);
+	if (flag & URF_WAIT) {
+		sigaction(SIGINT, &save_intr, NULL);
+		sigaction(SIGQUIT, &save_quit, NULL);
+
+		if (pid > 0) {
+			while (waitpid(pid, &status, 0) != pid) {
+				if (errno != EINTR) {
+					status = -1;
+					break;
+				}
+			}
+
+			if (wait_status)
+				*wait_status = status;
+		}
+	}
 
 	ueld_unblock_signal(SIGCHLD);
 	
 	return pid;
+}
+
+static char* memstr(char* src, const char* needle, size_t size)
+{
+	int p = 0;
+	int len = strlen(needle);
+
+	for (size_t i = 0; i < size; i++) {
+		if (src[i] == needle[p]) {
+			if (p == len - 1) return &(src[i - p]);
+			p++;
+		} else {
+			if (p) {
+				i--;
+				p = 0;
+			}
+		}
+	}
+
+	return 0;
 }
 
 char* ueld_readconfig(char* name)
@@ -211,7 +273,15 @@ char* ueld_readconfig(char* name)
 		close(fd);
 	}
 
-	p = strstr(config, name);
+	p = memstr(config, name, config_length);
+	if (!p) return NULL;
+	end = strchrnul(p, '\n');
+	*end = 0;
+	value = strchr(p, '=');
+	if (!value || *value == 0) return NULL;
+	return ++value;
+
+/*	p = strstr(config, name);
 	if (!p || *p == 0) return NULL;
 
 	end = strchrnul(p, '\n');
@@ -223,7 +293,7 @@ char* ueld_readconfig(char* name)
 		return NULL;
 	}
 	value++;
-
+*/
 	return value;
 }
 
@@ -242,8 +312,9 @@ long ueld_readconfiglong(char* name, long defaultval)
 
 void ueld_freeconfig(char* value)
 {
-	if (value)
-		*strchrnul(value, '\n') = '\n';
+	return;
+/*	if (value)
+		*strchrnul(value, '\n') = '\n';*/
 }
 
 void ueld_closeconfig()

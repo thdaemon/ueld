@@ -15,10 +15,11 @@ EOL
 }
 
 SIGNAL=''
+tmp=$0
 
-if [ "$0" = 'reboot' ]; then
+if [ "${tmp%reboot}" != "$0" ]; then
 	SIGNAL='-HUP'
-elif [ "$0" = 'poweroff' ]; then
+elif [ "${tmp%poweroff}" != "$0" ]; then
 	SIGNAL='-TERM'
 fi
 

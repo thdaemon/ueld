@@ -1,0 +1,5 @@
+1:getty tty1
+2:getty tty2
+3:getty tty3
+4:getty tty4
+5:getty tty5

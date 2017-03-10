@@ -35,9 +35,9 @@ static void runapp(struct restart_app* app)
 	pid_t pid;
 
 	if (app->vt) {
-		pid = ueld_run(app->cmd, URF_SETVT|URF_CMDLINE, app->vt);
+		pid = ueld_run(app->cmd, URF_SETVT|URF_CMDLINE, app->vt, NULL);
 	} else {
-		pid = ueld_run(app->cmd, URF_CMDLINE, 0);
+		pid = ueld_run(app->cmd, URF_CMDLINE, 0, NULL);
 	}
 
 	if (pid < 0) pid = 0;

@@ -1,2 +1,3 @@
 UELD_VERSION := 0.2
 UELD_OS := linux
+UELD_C_DEF := -DLINUX
