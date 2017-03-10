@@ -25,17 +25,17 @@ $(PRIFIX}/sbin/ueldctl -> ${PRIFIX}${INSTALLDIR}/ueldctl
 
 ####配置文件和脚本
 
-/etc/ueld/ueld.conf
+>/etc/ueld/ueld.conf
 
-/etc/ueld/sysinit.sh
+>/etc/ueld/sysinit.sh
 
-/etc/ueld/sysloaded.sh
+>/etc/ueld/sysloaded.sh
 
-/etc/ueld/syshalt.sh
+>/etc/ueld/syshalt.sh
 
-/etc/ueld/restarts.list
+>/etc/ueld/restarts.list
 
-/etc/ueld/ctrlaltdel.sh
+>/etc/ueld/ctrlaltdel.sh
 
 **/etc/ueld/ueld.conf**
 
@@ -47,7 +47,8 @@ name=value
 
 '=' 两侧不允许空格，'value' 两侧不允许引号
 
-name|default value|descript
+Name|Default Value|Description
+----|-------------|-----------
 ueld_execfile|/sbin/init|Ueld 可执行文件路径，当使用 `ueldctl -l` 时 ueld 进程 exec 该程序，不允许相对路径
 ueld_must_remount_before_poweroff|0|要求 Ueld 在切断机器电源之前必须卸载（或重载为只读）所有文件系统，否则停止关机过程并弹出 Shell
 system_shell|/bin/sh|设置系统 Shell 程序，不允许相对路径
