@@ -30,6 +30,9 @@ static void sig_user1(int signo)
 {
 	ueld_closeconfig();
 	char* path = ueld_readconfig("ueld_execfile");
+	if (!path)
+		path = "/sbin/init";
+
 	ueld_print("Trying to reload init '%s'\n", path);
 
 	if (path)
@@ -42,7 +45,6 @@ static void sig_user1(int signo)
 /* this function will be called when press ctrl-alt-del on a vt. */
 static void cad_handler()
 {
-	ueld_echo("Handle Ctrl-Alt-Del, runing /etc/ueld/ctrlaltdel.sh...");
 	ueld_run("/etc/ueld/ctrlaltdel.sh", URF_WAIT, 0, NULL);
 }
 

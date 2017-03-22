@@ -5,9 +5,9 @@ UELD_VERSION = 0.31
 
 ####程序和工具
 
-PREFIX 默认为 空白
+>PREFIX 默认为 空白
 
-INSTALLDIR 默认为 /usr/local/sbin/ueld/ueld-${UELD_VERSION}
+>INSTALLDIR 默认为 /usr/local/sbin/ueld/ueld-${UELD_VERSION}
 
 ${PRIFIX}${INSTALLDIR}/ueld
 

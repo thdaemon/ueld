@@ -8,46 +8,41 @@
 
 
 
-## UELD ---- Usermode Environment Loader Daemon
+##UELD ---- Usermode Environment Loader Daemon
 
-Switch language: [简体中文](README.zh_CN.md)
+Ueld (用户态环境加载器守护进程) 是一个轻量级的 Unix/Linux 环境下的 init 程序，可用于替换 SysVInit 和 Systemd
 
-> Note that this readme file has not yet completed the translation work
-
-Ueld (Usermode Environment Loader Daemon) is a lightweight init program under Unix/Linux environment, it can be used to replace SysVInit and Systemd
-
-#### Compile and install
+####编译与安装
 
 ```
 $ cd path-to-ueld-src
 $ make
 $ sudo make install
 ```
-The installation requires root user, so `sudo (8)` is used in this example. If you do not have `sudo (8)` in your system, use other methods to switch to Root.
 
-You can use the `PREFIX` variable to set the root file system. You can use the` INSTALLDIR` variable to set the installation directory.
+安装需要 Root 用户，因此本例中使用了 `sudo(8)`，如果你的系统中没有 `sudo(8)`，请使用其他方法切换到 Root。
 
-**Cross compile**
+可使用 `PREFIX` 变量设置根文件系统，可使用 `INSTALLDIR` 变量设置安装目录。
 
-If you want to cross-compute Ueld, then you can use the `CROSS` variable to set the cross compiler, such as the arm-linux-gnueabihf- cross compiler, you can
+**交叉编译**
+
+如果你希望交叉编译 Ueld，那么你可以使用 `CROSS` 变量设置交叉编译器，例如交叉编译器为 arm-linux-gnueabihf-，你可以
 
 ```
 $ make CROSS=arm-linux-gnueabihf-
 ```
 
-#### Configure and use Ueld
+####配置和使用 Ueld
 
-After the installation, i suggest you configure Ueld immediately, refer to [this wiki](doc/zh_CN/userguide.md)
+在安装后建议立刻配置 Ueld，参考 [此 Wiki](doc/zh_CN/userguide.md)
 
-> There is currently no English version, but soon there will be.
+**Ueld 使用手册也包含在这篇 Wiki 中；**卸载说明也包含在此 Wiki 中。
 
-** Ueld manual is also included in this wiki; ** Uninstallation instructions are also included in this wiki.
+如果你第一次安装 Ueld，那么 Ueld 配置文件被设置为在 tty1-5 上创建 `getty(8)` 等待登录，这可能不适合你的情况，因此，不要忘记配置它。值得注意的是，安装 Ueld 时，如果相应目录已经存在配置文件，也不会覆盖之前的配置文件，即使新版本的缺省配置可能发生变化。
 
-If you first install Ueld, then the Ueld configuration file is set to create `getty (8)` on tty1-5 to wait for login, which may not be suitable for your situation, so do not forget to configure it. Noteworthy, when you install Ueld, if the  configuration file in the corresponding directory is already exists, it will not overwrite the previous configuration file, even if the new version of the default configuration may be changed.
+####Ueld 的优点
 
-#### Advantages of Ueld
-
-- Ueld is very lightweight and simple, "small is both beautiful". The huge software is always uncomfortable, so I try to avoid Ueld becoming a huge software.
+- Ueld 非常轻量级和简洁，“小既是美”。庞大的东西总是让人很不舒服，因此我尽力避免 Ueld 成为庞大的软件。
 
 - 我尽力使 Ueld 仅提供 init 该提供的一系列原语操作，尽力做到 “提供机制，而不是策略”，行为的最终逻辑由用户制定，使其具有很强的灵活性。
 
@@ -57,9 +52,9 @@ If you first install Ueld, then the Ueld configuration file is set to create `ge
 
 - 最后一个，也是一个 Ueld 独有的、在大多数情况下没什么用、但有时可能挺实用的小功能，我把它叫做”Muti Init“，他允许你将 Ueld 配置为开机时选择加载哪一个 init 程序，ueld，sysvinit，还是 systemd。（PC 的用户或许会嘲笑我可以在 grub 中添加几个条目，他们使用不同的 init=xxx 内核启动参数，但是必须提到的是，像 NanoPi 这种设备，通过重刷 u-boot 来修改一次修改启动参数是一件苦差事）
 
-#### Ueld current question
+####Ueld 目前的问题
 
-- Ueld currently only supports Linux systems, however, most of the transplant layer code is placed in the os/ subdirectory, the other code also take into account the portability problem (such as BSD need to use ioctl (2) set the control terminal), it can be transplanted to other Unix systems, but the init program itself determines that the characteristics of the different platforms have to make a lot of differences in the code. Portability requires a certain amount of work.
+- Ueld 目前仅支持 Linux 系统，不过，绝大部分移植层代码都放置在 os/ 子目录中，其他代码也考虑到了移植问题（例如 BSD 上需要用 ioctl(2) 设置控制终端），因此可以移植到其他 Unix 系统，但 init 程序本身的特性决定了不同平台的代码必须存在大量差异，移植需要一定的工作。
 
 - Ueld 目前不支持命令行和配置文件中转义字符和引号
 

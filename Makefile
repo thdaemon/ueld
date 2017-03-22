@@ -47,7 +47,7 @@ install : ueld
 	ln -s -f $(PREFIX)$(INSTALLDIR)/ueldctl /sbin/ueldctl
 
 test:
-	@echo "FIX ME: Need a test target"
+	@echo "FIXME: Need a test target"
 
 clean:
 	rm -f *.o os/$(UELD_OS)/*.o ueld

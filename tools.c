@@ -270,8 +270,9 @@ char* ueld_readconfig(char* name)
 		return NULL;
 	}
 	value++;
-*/
+
 	return value;
+*/
 }
 
 long ueld_readconfiglong(char* name, long defaultval)

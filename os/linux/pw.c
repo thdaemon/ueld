@@ -20,3 +20,11 @@ int ueld_os_reboot(int cmd)
 	
 	return reboot(linux_cmd);
 }
+
+/*
+int ueld_os_reboot_with_cmd(char* cmd)
+{
+	return reboot(LINUX_REBOOT_MAGIC, LINUX_REBOOT_MAGIC2,
+	        LINUX_REBOOT_CMD_RESTART2, cmd);
+}
+*/
