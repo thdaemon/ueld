@@ -1,9 +1,9 @@
-###Ueld 用户手册
+### Ueld 用户手册 Wiki
 
 Ueld 版本: 0.31
 UELD_VERSION = 0.31
 
-####程序和工具
+#### 程序和工具
 
 >PREFIX 默认为 空白
 
@@ -23,7 +23,7 @@ $(PRIFIX}/sbin/ueldctl -> ${PRIFIX}${INSTALLDIR}/ueldctl
 
 **ueldctl** 控制 Ueld 进程的实用工具，使用方法见 “ueldctl 实用工具” 一节。
 
-####配置文件和脚本
+#### 配置文件和脚本
 
 >/etc/ueld/ueld.conf
 
@@ -117,7 +117,7 @@ ueld 将等待该脚本执行完毕再继续运行，该脚本继承 ueld 的标
 
 注：在 X Server 一类的应用程序运行时，键盘处于 Raw 模式，此时 Linux 内核的 vt 驱动不会处理此按键，因此 ueld 不会得到通知
 
-####ueldctl 实用工具
+#### ueldctl 实用工具
 
 `ueldctl -p` 或 `ueldctl --poweroff` 关机
 
@@ -129,7 +129,7 @@ ueld 将等待该脚本执行完毕再继续运行，该脚本继承 ueld 的标
 
 还有一种特殊用法，你可以创建指向 ueldctl 的符号链接，名字为 poweroff 则不带参数运行等价于 `ueldctl -p` ，reboot 同理
 
-####卸载 Ueld
+#### 卸载 Ueld
 
 1. 删除安装 Ueld 时设置的安装目录(默认为 ${PREFIX}/usr/local/sbin/ueld/ueld-${UELD_VERSION})，一级配置文件 ${PREFIX}/etc/ueld/ 目录
 
