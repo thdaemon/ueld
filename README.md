@@ -2,8 +2,6 @@
 
 Switch language: [简体中文](README.zh_CN.md)
 
-> Note that this readme file has not yet completed the translation work
-
 Ueld (Usermode Environment Loader Daemon) is a lightweight init program under Unix/Linux environment, it can be used to replace SysVInit and Systemd
 
 #### Compile and install
@@ -39,7 +37,7 @@ If you first install Ueld, then the Ueld configuration file is set to create `ge
 
 - Ueld is very lightweight and simple, "small is both beautiful". The huge software is always uncomfortable, so I try to avoid Ueld becoming a huge software.
 
-- 我尽力使 Ueld 仅提供 init 该提供的一系列原语操作，尽力做到 “提供机制，而不是策略”。通过用户可编辑的脚本，将系统启动，关机时的具体策略交由不同的软件去完成，所有行为的最终逻辑可由用户根据他们自己的需要制定，使其具有很强的灵活性。
+- I try my best to let Ueld to only provide a series of primitive operations of init. and try my best to provide "the mechanism, not the strategy". Through scripts which are editable for users, The system start, shut down the specific strategy to complete the different software, The final logic of all actions can be formulate by users themselves to meet their own needs, so it has a strong flexibility.
 
 - Ueld particularly suitable for devices such as Raspberry Pi, or a people who care about speed. In fact, I develop ueld in a "class Raspberry Pi" board ---- NanoPi 2Fire. The device use the Debian 8 system, with ueld replace systemd, the boot speed increased by 10-20 times! (Which made me surprised)
 
@@ -49,10 +47,10 @@ If you first install Ueld, then the Ueld configuration file is set to create `ge
 
 - Ueld currently only supports Linux systems, however, most of the transplant layer code is placed in the os/ subdirectory, the other code also take into account the portability problem (such as BSD need to use `ioctl(2)` set the control terminal), it can be transplanted to other Unix systems, but the init program itself determines that the characteristics of the different platforms have to make a lot of differences in the code. Portability requires a certain amount of work.
 
-- Ueld 目前不支持命令行和配置文件中转义字符和引号
+- Ueld currently does not support escaped characters and quotation marks.
 
-- Ueld 目前使用了多个信号处理各种 ueldctl 命令，更好的方案是像 telinit 那样
+- Ueld currently uses many signal handler to handle ueldctl command, there is not a telinit fifo.
 
-- Ueld 目前不支持带参数重启
+- Ueld currently dose not support reboot with parameter.
 
-- Ueld 目前不能优雅得与现有桌面环境进行整合
+- Ueld could not integrate with the existing Desktop environment gracefully now.
