@@ -1,0 +1,4 @@
+*.o
+ueld
+
+/os/linux/*.o

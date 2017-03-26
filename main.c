@@ -39,7 +39,6 @@ static void sig_user1(int signo)
 		execl(path, "-ueld", 0);
 		
 	ueld_print("Reload init '%s' failed.\n", path ? path : "Unknown");
-	ueld_freeconfig(path);
 }
 
 /* this function will be called when press ctrl-alt-del on a vt. */

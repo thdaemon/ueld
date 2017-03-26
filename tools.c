@@ -257,22 +257,6 @@ char* ueld_readconfig(char* name)
 	value = strchr(p, '=');
 	if (!value || *value == 0) return NULL;
 	return ++value;
-
-/*	p = strstr(config, name);
-	if (!p || *p == 0) return NULL;
-
-	end = strchrnul(p, '\n');
-	*end = 0;
-
-	value = strchr(p, '=');
-	if (!value || *value == 0) {
-		*end = '\n';
-		return NULL;
-	}
-	value++;
-
-	return value;
-*/
 }
 
 long ueld_readconfiglong(char* name, long defaultval)
@@ -282,17 +266,9 @@ long ueld_readconfiglong(char* name, long defaultval)
 	char* value = ueld_readconfig(name);
 	if (value) {
 		i = atol(value);
-		ueld_freeconfig(value);
 	}
 	
 	return i;
-}
-
-void ueld_freeconfig(char* value)
-{
-	return;
-/*	if (value)
-		*strchrnul(value, '\n') = '\n';*/
 }
 
 void ueld_closeconfig()
