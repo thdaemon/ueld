@@ -10,7 +10,6 @@
 #include <errno.h>
 #include <sys/mman.h>
 
-#include "readline.h"
 #include "tools.h"
 
 #define RESTARTS_FILE "/etc/ueld/restarts.list"

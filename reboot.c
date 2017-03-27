@@ -17,7 +17,7 @@
 
 #include "os/pw.h"
 #include "os/chvt.h"
-#include "readline.h"
+#include "fileio.h"
 #include "tools.h"
 #include "restarts.h"
 
@@ -28,7 +28,7 @@ static void killproc(int signo){
 	struct dirent* dent;
 
 	dir = opendir("/proc");
-	dent = readdir(dir);	
+	dent = readdir(dir);
 
 	while (dent != NULL){
 		pid_t pid = atol(dent->d_name);
@@ -51,7 +51,7 @@ static int ueld_umount(char* info)
 	*target++ = 0;
 	type = strchr(target, ' ');
 	*type++ = 0;
-	
+
 	printf("Trying to unmount %s\n", target);
 
 	if ((fd = open(target, O_RDONLY)) >= 0) {
@@ -66,17 +66,70 @@ static int ueld_umount(char* info)
 			return 0;
 		}
 	}
-	
+
 	if (mount(src, target, type, MS_MGC_VAL|MS_RDONLY|MS_REMOUNT, NULL) < 0) {
 		perror("mount");
 		return -1;
 	}
-	
+
 	return 0;
+}
+
+char* readline(char* buffer, char** next)
+{
+	char* tmp;
+
+	tmp = strchrnul(buffer, '\n');
+
+	if (*tmp == 0)
+		return 0;
+
+	*tmp = 0;
+	*next = tmp + 1;
+
+	return buffer;
+}
+
+static int _umount_all(char* mntinfo)
+{
+	int umount_fail_cnt;
+	char *p, *next;
+
+	umount_fail_cnt = 0;
+	next = mntinfo;
+	while ((p = readline(next, &next)) != 0) {
+		if (ueld_umount(p) < 0)
+			umount_fail_cnt++;
+	}
+
+	return umount_fail_cnt;
+}
+
+static int umount_all(char* mntinfo)
+{
+	static int n = 0;
+
+	int umount_fail_cnt;
+
+	umount_fail_cnt = _umount_all(mntinfo);
+	if (umount_fail_cnt)
+		n = umount_fail_cnt;
+
+	for (int i = 0; i < n; i++) {
+		if ((umount_fail_cnt = _umount_all(mntinfo)) == 0)
+			break;
+	}
+
+	return umount_fail_cnt;
 }
 
 int ueld_reboot(int cmd)
 {
+	int fd, status;
+	off_t length;
+	pid_t pid;
+	char* buffer;
+
 	if (getpid() != 1) {
 		ueld_echo("Must run as pid 1");
 		return -1;
@@ -99,8 +152,6 @@ int ueld_reboot(int cmd)
 
 	ueld_os_chvt(1);
 
-	int status;
-	pid_t pid;
 	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {}
 
 	ueld_echo("Running syshalt.sh...");
@@ -110,32 +161,35 @@ int ueld_reboot(int cmd)
 	sync();
 
 	ueld_echo("Unmounting/Re-mounting file systems...");
-	
-	int fd;
-	char s[256];
+
 	if ((fd = open(MOUNTS, O_RDONLY)) < 0) {
 		perror("open");
 		return -1;
 	}
 
-	int hasumountfs = 0;
-
-	while (readline(fd, s, sizeof(s)) > 0) {
-		if (ueld_umount(s) < 0)
-			hasumountfs = 1;
-		//system("echo -n \"u\" > /proc/sysrq-trigger");
+	if ((length = readnsa(fd, &buffer)) < 0) {
+		perror("read");
+		return -1;
 	}
 
+	if (realloc(buffer, length + 1) == 0) {
+		printf("alloc mem failed: %s", strerror(ENOMEM));
+		return -1;
+	}
+	buffer[length] = 0;
 	close(fd);
 
-	if (hasumountfs && ueld_readconfiglong("ueld_must_remount_before_poweroff", -1) == 1) {
+	if (umount_all(buffer) != 0 && ueld_readconfiglong("ueld_must_remount_before_poweroff", -1) == 1) {
 		ueld_echo("Remount some filesystems failed, droping to a shell...");
 		char* sh = ueld_readconfig("system_shell");
-		if (!sh) sh = "/bin/sh";
+		if (!sh)
+			sh = "/bin/sh";
 		ueld_run(sh, 0, 0, NULL);
 		ueld_freeconfig(sh);
 		return -1;
 	}
+
+	free(buffer);
 
 	ueld_echo("Doing poweroff...");
 	if (ueld_os_reboot(cmd) < 0)
