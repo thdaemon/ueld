@@ -36,7 +36,7 @@ install : ueld
 	rm -f $(PREFIX)$(INSTALLDIR)/ueld*
 	cp ueld $(PREFIX)$(INSTALLDIR)
 
-	ln -s -f $(PREFIX)$(INSTALLDIR)/ueld /sbin/init
+	ln -s -f $(INSTALLDIR)/ueld $(PREFIX)/sbin/init
 
 	mkdir -p $(ETCDIR)
 	cp -n etcfiles/* $(ETCDIR)/
@@ -44,7 +44,7 @@ install : ueld
 	chmod 755 $(ETCDIR)/*.sh
 
 	cp usertool/ueldctl $(PREFIX)$(INSTALLDIR)/ueldctl
-	ln -s -f $(PREFIX)$(INSTALLDIR)/ueldctl /sbin/ueldctl
+	ln -s -f $(INSTALLDIR)/ueldctl $(PREFIX)/sbin/ueldctl
 
 test:
 	@echo "FIXME: Need a test target"
