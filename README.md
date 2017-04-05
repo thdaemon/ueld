@@ -25,11 +25,9 @@ $ make CROSS=arm-linux-gnueabihf-
 
 #### Configure and use Ueld
 
-After the installation, i suggest you configure Ueld immediately, refer to [this wiki](doc/zh_CN/userguide.md)
+After the installation, i suggest you configure Ueld immediately, refer to [this wiki](doc/userguide.md)
 
-> There is currently no English version, but soon there will be.
-
-** Ueld manual is also included in this wiki; ** Uninstallation instructions are also included in this wiki.
+**Ueld manual is also included in this wiki;** Uninstallation instructions are also included in this wiki.
 
 If you first install Ueld, then the Ueld configuration file is set to create `getty(8)` on tty1-5 to wait for login, which may not be suitable for your situation, so do not forget to configure it. Noteworthy, when you install Ueld, if the configuration file in the corresponding directory is already exists, it will not overwrite the previous configuration file, even if the new version of the default configuration may be changed.
 
