@@ -22,17 +22,22 @@ int ueld_os_chvt(int vt)
 {
 	int fd;
 
-	/*if ((fd = open("/dev/console", O_RDONLY)) < 0)
-		return -1;*/
-	fd = STDIN_FILENO; /* FIXME: I use stdin, is it a good way? */
+	if ((fd = open("/dev/console", O_RDONLY)) < 0)
+		return -1;
 
 	setconsole(fd, vt);
+	close(fd);
+
+	if ((fd = open("/dev/tty0", O_RDONLY)) < 0)
+		return -1;
 
 	if (ioctl(fd, VT_ACTIVATE, vt) < 0)
 		return -1;
 
 	if (ioctl(fd, VT_WAITACTIVE, vt) < 0)
 		return -1;
+
+	close(fd);
 
 	return 0;
 }

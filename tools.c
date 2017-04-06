@@ -57,20 +57,39 @@ int ueld_block_signal(int signum)
 	return sigprocmask(SIG_BLOCK, &set, &oset);
 }
 
-void ueld_echo(char* msg)
-{
-	printf("[ueld] %s\n", msg);
-}
-
 void ueld_print(char* fmt, ...)
 {
+	int fd;
 	va_list ap;
+	char buff[1024];
+
 	va_start(ap, fmt);
+	vsnprintf(buff, sizeof(buff), fmt, ap);
+
+	/*
+	 * See main.c, for Linux Sysrq SAK problem
+	 * And it cause a window that is not 'SAK safe'
+	 */
+#ifdef LINUX
+	if ((fd = open("/dev/console", O_NOCTTY | O_WRONLY)) < 0)
+		return;
+#else
+	fd = STDOUT_FILENO;
+#endif // LINUX
 	
-	write(STDOUT_FILENO, "[ueld] ", 7);
-	vprintf(fmt, ap);
+	write(fd, "[ueld] ", 7);
+	write(fd, buff, strlen(buff));
+
+#ifdef LINUX
+	close(fd);
+#endif // LINUX
 	
 	va_end(ap);
+}
+
+void ueld_echo(char* msg)
+{
+	ueld_print("%s\n", msg);
 }
 
 pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
