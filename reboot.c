@@ -52,7 +52,7 @@ static int ueld_umount(char* info)
 	type = strchr(target, ' ');
 	*type++ = 0;
 
-	printf("Trying to unmount %s\n", target);
+	ueld_print("Trying to unmount %s\n", target);
 
 	if ((fd = open(target, O_RDONLY)) >= 0) {
 		syncfs(fd);
@@ -61,14 +61,14 @@ static int ueld_umount(char* info)
 
 	if (strcmp(target, "/") != 0) {
 		if (umount(target) < 0) {
-			printf("Unmounting %s failed (%s), trying to remount it to read-only.\n", target, strerror(errno));
+			ueld_print("Unmounting %s failed (%s), trying to remount it to read-only.\n", target, strerror(errno));
 		} else {
 			return 0;
 		}
 	}
 
 	if (mount(src, target, type, MS_MGC_VAL|MS_RDONLY|MS_REMOUNT, NULL) < 0) {
-		perror("mount");
+		ueld_print("Error: Re-mount %s failed (%s), system will not poweroff or poweroff unsafely.", target, strerror(errno));
 		return -1;
 	}
 
@@ -163,17 +163,17 @@ int ueld_reboot(int cmd)
 	ueld_echo("Unmounting/Re-mounting file systems...");
 
 	if ((fd = open(MOUNTS, O_RDONLY)) < 0) {
-		perror("open");
+		ueld_print("open: %s", strerror(errno));
 		return -1;
 	}
 
 	if ((length = readnsa(fd, &buffer)) < 0) {
-		perror("read");
+		ueld_print("read: %s", strerror(errno));
 		return -1;
 	}
 
 	if (realloc(buffer, length + 1) == 0) {
-		printf("alloc mem failed: %s", strerror(ENOMEM));
+		ueld_print("realloc mem failed.");
 		return -1;
 	}
 	buffer[length] = 0;
@@ -193,6 +193,6 @@ int ueld_reboot(int cmd)
 
 	ueld_echo("Doing poweroff...");
 	if (ueld_os_reboot(cmd) < 0)
-		perror("reboot");
+		ueld_print("reboot: %s", strerror(errno));
 	exit(1);
 }
