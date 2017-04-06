@@ -2,14 +2,15 @@
 
 Switch language: [简体中文](zh_CN/userguide.md)
 
-Ueld Version: 0.31
-UELD_VERSION = 0.31
+Ueld Version: 0.33
+
+UELD_VERSION = 0.33
 
 #### programs and tools
 
 > PREFIX defaults to blank
 >
-> INSTALLDIR defaults to /usr/local/sbin/ueld/ueld-${UELD_VERSION}
+> INSTALLDIR defaults to /usr/lib/ueld/ueld-${UELD_VERSION}
 
 ${PRIFIX}${INSTALLDIR}/ueld
 

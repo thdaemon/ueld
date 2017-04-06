@@ -1,13 +1,14 @@
 ### Ueld 用户手册 Wiki
 
-Ueld 版本: 0.31
-UELD_VERSION = 0.31
+Ueld 版本: 0.33
+
+UELD_VERSION = 0.33
 
 #### 程序和工具
 
 >PREFIX 默认为 空白
 
->INSTALLDIR 默认为 /usr/local/sbin/ueld/ueld-${UELD_VERSION}
+>INSTALLDIR 默认为 /usr/lib/ueld/ueld-${UELD_VERSION}
 
 ${PRIFIX}${INSTALLDIR}/ueld
 

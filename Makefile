@@ -8,7 +8,7 @@ include Make.defines.$(PLATFORM)
 
 
 PREFIX :=
-INSTALLDIR := /usr/local/sbin/ueld/ueld-$(UELD_VERSION)
+INSTALLDIR := /usr/lib/ueld/ueld-$(UELD_VERSION)
 ETCDIR := $(PREFIX)/etc/ueld
 
 OBJS := main.o minit.o fileio.o reboot.o tools.o restarts.o os/$(UELD_OS)/pw.o os/$(UELD_OS)/chvt.o os/$(UELD_OS)/ctrlaltdel.o
