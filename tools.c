@@ -76,20 +76,42 @@ void ueld_print(char* fmt, ...)
 #else
 	fd = STDOUT_FILENO;
 #endif // LINUX
-	
+
 	write(fd, "[ueld] ", 7);
 	write(fd, buff, strlen(buff));
 
 #ifdef LINUX
 	close(fd);
 #endif // LINUX
-	
+
 	va_end(ap);
 }
 
 void ueld_echo(char* msg)
 {
 	ueld_print("%s\n", msg);
+}
+
+static void setstdfd(char* pathname, int flags, char* exec_file)
+{
+	int fd0, fd1, fd2;
+
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
+
+	if ((fd0 = open(pathname, O_RDWR | flags)) < 0) {
+		ueld_print("Could not run '%s': Open '%s' error (%s)\n", exec_file, pathname, strerror(errno));
+		_exit(EXIT_FAILURE);
+	}
+
+	fd1 = dup(fd0);
+	fd2 = dup(fd0);
+
+	if((fd0 != STDIN_FILENO) || (fd1 != STDOUT_FILENO) || (fd2 != STDERR_FILENO)){
+		ueld_print("Could not run '%s': Unexcept file discriptor number.\n", exec_file);
+		_exit(EXIT_FAILURE);
+	}
 }
 
 pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
@@ -131,43 +153,14 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 		}
 
 		if (flag & URF_NOOUTPUT) {
-			close(STDIN_FILENO);
-			close(STDOUT_FILENO);
-			close(STDERR_FILENO);
-
-			int fd0 = open("/dev/null", O_RDWR);
-			int fd1 = dup(fd0);
-			int fd2 = dup(fd0);
-
-			if((fd0 != STDIN_FILENO) || (fd1 != STDOUT_FILENO) || (fd2 != STDERR_FILENO)){
-				ueld_print("Could not run '%s': Unexcept file discriptor number.\n", file);
-				_exit(EXIT_FAILURE);
-			}
-		}
-
-		if (flag & URF_SETVT) {
-			int fd0, fd1, fd2;
+			setstdfd("/dev/null", 0, file);
+		} else if (flag & URF_SETVT) {
 			char devname[256];
-
-			close(STDIN_FILENO);
-			close(STDOUT_FILENO);
-			close(STDERR_FILENO);
 
 			setsid();
 
 			snprintf(devname, sizeof(devname), "/dev/tty%d", vt);
-			if((fd0 = open(devname, O_RDWR)) < 0) {
-				ueld_print("Could not run '%s': Open vt '%s' error (%s)\n", file, devname, strerror(errno));
-				_exit(EXIT_FAILURE);
-			}
-
-			fd1 = dup(fd0);
-			fd2 = dup(fd0);
-
-			if((fd0 != STDIN_FILENO) || (fd1 != STDOUT_FILENO) || (fd2 != STDERR_FILENO)){
-				ueld_print("Could not run '%s': Unexcept file discriptor number.\n", file);
-				_exit(EXIT_FAILURE);
-			}
+			setstdfd(devname, 0, file);
 
 #ifdef BSD
 			if (ioctl(fd0, TIOCSCTTY, (char*)vt) < 0) {
@@ -175,8 +168,10 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 				_exit(EXIT_FAILURE);
 			}
 #endif
+		} else if (flag & URF_CONSOLE) {
+			setstdfd("/dev/console", O_NOCTTY, file);
 		}
-		
+
 		if (flag & URF_CMDLINE) {
 			char* args[MAX_ARGS + 1];
 			char* ptr;
@@ -204,7 +199,7 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 		ueld_print("Could not run '%s': execl failed(%s)\n", file, strerror(errno));
 		_exit(EXIT_FAILURE);
 	}
-	
+
 	/* parent */
 	if (flag & URF_WAIT) {
 		if (pid > 0) {
@@ -224,7 +219,7 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 	}
 
 	ueld_unblock_signal(SIGCHLD);
-	
+
 	return pid;
 }
 
@@ -286,7 +281,7 @@ long ueld_readconfiglong(char* name, long defaultval)
 	if (value) {
 		i = atol(value);
 	}
-	
+
 	return i;
 }
 

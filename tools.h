@@ -11,7 +11,8 @@ void ueld_print(char* fmt, ...);
 #define URF_SETSID (1 << 1)
 #define URF_NOOUTPUT (1 << 2)
 #define URF_SETVT (1 << 3)
-#define URF_CMDLINE (1 << 4)
+#define URF_CONSOLE (1 << 4)
+#define URF_CMDLINE (1 << 5)
 pid_t ueld_run(char* file, int flag, int vt, int* wait_status);
 
 char* ueld_readconfig(char* name);
