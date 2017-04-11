@@ -46,7 +46,7 @@ static void sig_user1(int signo)
 /* this function will be called when press ctrl-alt-del on a vt. */
 static void cad_handler()
 {
-	ueld_run("/etc/ueld/ctrlaltdel.sh", URF_WAIT, 0, NULL);
+	ueld_run("/etc/ueld/ctrlaltdel.sh", URF_WAIT|URF_CONSOLE, 0, NULL);
 }
 
 int ueld_main(int argc, char* argv[])

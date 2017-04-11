@@ -155,7 +155,7 @@ int ueld_reboot(int cmd)
 	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {}
 
 	ueld_echo("Running syshalt.sh...");
-	ueld_run("/etc/ueld/syshalt.sh", URF_WAIT, 0, NULL);
+	ueld_run("/etc/ueld/syshalt.sh", URF_WAIT|URF_CONSOLE, 0, NULL);
 
 	ueld_echo("Syncing disk...");
 	sync();
@@ -184,7 +184,7 @@ int ueld_reboot(int cmd)
 		char* sh = ueld_readconfig("system_shell");
 		if (!sh)
 			sh = "/bin/sh";
-		ueld_run(sh, 0, 0, NULL);
+		ueld_run(sh, URF_CONSOLE, 0, NULL);
 
 		return -1;
 	}
