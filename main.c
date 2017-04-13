@@ -49,6 +49,17 @@ static void cad_handler()
 	ueld_run("/etc/ueld/ctrlaltdel.sh", URF_WAIT|URF_CONSOLE, 0, NULL);
 }
 
+static void setevar()
+{
+	char* path = ueld_readconfig("ueld_path_var");
+	if (!path) return;
+
+	int override = ueld_readconfiglong("ueld_override_path_var", 0);
+
+	if (getenv("PATH") == NULL || override)
+		setenv("PATH", path, 1);
+}
+
 int ueld_main(int argc, char* argv[])
 {
 	int status;
@@ -64,8 +75,7 @@ int ueld_main(int argc, char* argv[])
 
 	ueld_unblock_signal(SIGUSR1);
 
-	if (ueld_os_handle_ctrl_alt_del(cad_handler) < 0)
-		ueld_print("Warning: Could not handle ctrl-alt-del, %s", strerror(errno));
+	setevar();
 
 	ueld_signal(SIGTERM, &sig_term, 1);
 	ueld_signal(SIGHUP, &sig_hup, 1);
@@ -76,6 +86,9 @@ int ueld_main(int argc, char* argv[])
 		restarts_init();
 		ueld_run("/etc/ueld/sysloaded.sh", URF_NOOUTPUT, 0, NULL);
 	}
+
+	if (ueld_os_handle_ctrl_alt_del(cad_handler) < 0)
+		ueld_print("Warning: Could not handle ctrl-alt-del, %s\n", strerror(errno));
 
 #ifdef LINUX
 	/*
