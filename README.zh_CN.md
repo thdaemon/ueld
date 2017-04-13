@@ -1,3 +1,8 @@
+
+**警告**：英文版本已经经过了修改，然而中文版本却没有更新，此文件内容已经与英文版本脱节，现在，中文版本的内容可能已经过时或存在错误
+
+查看 [英文版本](README.md)
+
 ## UELD ---- Usermode Environment Loader Daemon
 
 Ueld (用户态环境加载器守护进程) 是一个轻量级的 Unix/Linux 环境下的 init 程序，可用于替换 SysVInit 和 Systemd

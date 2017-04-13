@@ -1,0 +1,14 @@
+This is ueld config files and scripts which will be installed in /etc/ueld.
+
+generic/
+	There are the generic files. The others are used in special time.
+
+no_initramfs/
+	Used when you `make install_no_initramfs`
+
+===============================================================================
+
+Install method:
+
+	Firstly, copy special files, and then copy generic files. When a file is
+exist in ${PREFIX}/etc/ueld when copying, it won't copy it.

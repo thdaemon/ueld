@@ -31,20 +31,34 @@ ueld : $(OBJS)
 	@echo "  CC	$@"
 	@$(CROSS)$(CC) -c -o $@ $(CFLAG) $<
 
-install : ueld
+install_ueld_executable : ueld
 	mkdir -p $(PREFIX)$(INSTALLDIR)
 	rm -f $(PREFIX)$(INSTALLDIR)/ueld*
 	cp ueld $(PREFIX)$(INSTALLDIR)
-
 	ln -s -f $(INSTALLDIR)/ueld $(PREFIX)/sbin/init
-
-	mkdir -p $(ETCDIR)
-	cp -n etcfiles/* $(ETCDIR)/
-	touch $(ETCDIR)/*
-	chmod 755 $(ETCDIR)/*.sh
 
 	cp usertool/ueldctl $(PREFIX)$(INSTALLDIR)/ueldctl
 	ln -s -f $(INSTALLDIR)/ueldctl $(PREFIX)/sbin/ueldctl
+
+install_generic_etc_file:
+	mkdir -p $(ETCDIR)
+	cp -n etcfiles/generic/* $(ETCDIR)/
+	touch $(ETCDIR)/*
+	chmod 755 $(ETCDIR)/*.sh
+
+install_no_initramfs:
+	make install_ueld_executable
+
+	mkdir -p $(ETCDIR)
+	cp -n etcfiles/no_initramfs/* $(ETCDIR)/
+	touch $(ETCDIR)/*
+	chmod 755 $(ETCDIR)/*.sh
+
+	make install_generic_etc_file
+
+install:
+	make install_ueld_executable
+	make install_generic_etc_file
 
 test:
 	@echo "FIXME: Need a test target"
