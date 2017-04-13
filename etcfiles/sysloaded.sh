@@ -5,6 +5,11 @@
 # Note: If you want to start getty etc., maybe you want to add it in restarts.list
 
 # Example: Start a X Window Session (Such like a display manager).
-# su -l fa -c 'exec startx -- vt7' < /dev/tty7 > /dev/tty7 2>&1 &
+# su -l YOUR_USER_NAME -c 'exec startx -- vt7' < /dev/tty7 > /dev/tty7 2>&1 &
+
+# system resolv need it
+mkdir -p /run/resolvconf
+touch /run/resolvconf/resolv.conf
+mkdir /run/resolvconf/interface
 
 exit 0
