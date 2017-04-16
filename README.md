@@ -23,6 +23,14 @@ If you want to cross-compute Ueld, then you can use the `CROSS` variable to set 
 $ make CROSS=arm-linux-gnueabihf-
 ```
 
+**Install for the linux system which does not use initramfs (or initrd).**
+
+Some system dose not use initramfs. That means ueld should mount some filesystems by itself. To install ueld for these system, you need
+
+```
+$ sudo make install_no_initramfs
+```
+
 #### Configure and use Ueld
 
 After the installation, i suggest you configure Ueld immediately, refer to [this wiki](doc/userguide.md)
