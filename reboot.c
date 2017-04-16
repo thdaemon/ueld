@@ -59,6 +59,10 @@ static int ueld_umount(char* info)
 		close(fd);
 	}
 
+	if (umount(target) == 0)
+		return 0;
+
+/*
 	if (strcmp(target, "/") != 0) {
 		if (umount(target) < 0) {
 			ueld_print("Unmounting %s failed (%s), trying to remount it to read-only.\n", target, strerror(errno));
@@ -66,16 +70,20 @@ static int ueld_umount(char* info)
 			return 0;
 		}
 	}
+*/
 
 	if (mount(src, target, type, MS_MGC_VAL|MS_RDONLY|MS_REMOUNT, NULL) < 0) {
-		ueld_print("Error: Re-mount %s failed (%s), system will not poweroff or poweroff unsafely.", target, strerror(errno));
-		return -1;
+		/* EINVAL means that the filesystem is not mounted. */
+		if (errno != EINVAL) {
+			ueld_print("Re-mount %s failed (%s), system will not poweroff or poweroff unsafely if the it can not be fixup later.\n", target, strerror(errno));
+			return -1;
+		}
 	}
 
 	return 0;
 }
 
-char* readline(char* buffer, char** next)
+static char* readline(char* buffer, char** next)
 {
 	char* tmp;
 
@@ -90,33 +98,37 @@ char* readline(char* buffer, char** next)
 	return buffer;
 }
 
-static int _umount_all(char* mntinfo)
+static int _umount_all(char* mntinfo, size_t length)
 {
 	int umount_fail_cnt;
-	char *p, *next;
+	char *mnts, *p, *next;
+
+	if ((mnts = malloc(length)) == NULL)
+		return -1;
+
+	memcpy(mnts, mntinfo, length);
 
 	umount_fail_cnt = 0;
-	next = mntinfo;
+	next = mnts;
 	while ((p = readline(next, &next)) != 0) {
 		if (ueld_umount(p) < 0)
 			umount_fail_cnt++;
 	}
 
+	free(mnts);
 	return umount_fail_cnt;
 }
 
-static int umount_all(char* mntinfo)
+static int umount_all(char* mntinfo, size_t length)
 {
-	static int n = 0;
+	int umount_fail_cnt, n;
 
-	int umount_fail_cnt;
-
-	umount_fail_cnt = _umount_all(mntinfo);
-	if (umount_fail_cnt)
+	n = 0;
+	if ((umount_fail_cnt = _umount_all(mntinfo, length)) > 0)
 		n = umount_fail_cnt;
 
 	for (int i = 0; i < n; i++) {
-		if ((umount_fail_cnt = _umount_all(mntinfo)) == 0)
+		if ((umount_fail_cnt = _umount_all(mntinfo, length)) == 0)
 			break;
 	}
 
@@ -179,7 +191,7 @@ int ueld_reboot(int cmd)
 	buffer[length] = 0;
 	close(fd);
 
-	if (umount_all(buffer) != 0 && ueld_readconfiglong("ueld_must_remount_before_poweroff", -1) == 1) {
+	if ((umount_all(buffer, length + 1) != 0) && (ueld_readconfiglong("ueld_must_remount_before_poweroff", -1) == 1)) {
 		ueld_echo("Remount some filesystems failed, droping to a shell...");
 		char* sh = ueld_readconfig("system_shell");
 		if (!sh)
