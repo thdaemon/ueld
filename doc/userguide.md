@@ -2,9 +2,7 @@
 
 Switch language: [简体中文](zh_CN/userguide.md)
 
-Ueld Version: 0.33
-
-UELD_VERSION = 0.33
+Ueld Version: 0.34
 
 #### programs and tools
 
@@ -60,6 +58,8 @@ ueld_muti_init_other_init|blank|When ueld_enable_muti_init is 1 (when Muti Init 
 ueld_muti_init_other_init_telinit|blank|When ueld_enable_muti_init is 1 (when Muti Init is enabled), it is the absolute path of the telinit program of another init package, such as /bin/systemd
 ueld_muti_init_choose_time_out|3|When ueld_enable_muti_init is 1 (when Muti Init is enabled), the maximum number of seconds to wait for the init program to be selected at boot time, and select to load ueld when it times out
 ueld_muti_init_press_keys|Ss|When ueld_enable_muti_init is 1 (when Muti Init is enabled), in the choice, the hotkey to let ueld load another init program, allowing the same time specify multiple hotkeys, case-sensitive
+ueld_path_var|blank|If it is not blank, ueld will set it to `$PATH` when `$PATH` is blank. If you want to force override `$PATH`, use ueld_override_path_var
+ueld_override_path_var|0|When it is 1, ueld will force override `$PATH` to ueld_path_var
 
 Note: The "default" value in the table above means that if the ueld.conf file does not include this item, ueld uses the value, rather than the direct copy of the ueld.conf file configuration when install Ueld!
 
