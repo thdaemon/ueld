@@ -158,11 +158,11 @@ static int umount_all()
 	length++;
 
 	n = 0;
-	if ((umount_fail_cnt = _umount_all(mntinfo, length)) > 0)
+	if ((umount_fail_cnt = _umount_all(buffer, length)) > 0)
 		n = umount_fail_cnt;
 
 	for (int i = 0; i < n; i++) {
-		if ((umount_fail_cnt = _umount_all(mntinfo, length)) == 0)
+		if ((umount_fail_cnt = _umount_all(buffer, length)) == 0)
 			break;
 	}
 
