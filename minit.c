@@ -8,9 +8,11 @@
 #include <termios.h>
 
 #include "tools.h"
-
 #include "restarts.h"
 
+#include "config.h"
+
+#ifndef CONFIG_NO_BUILD_IN_MINIT
 int timeout = 0;
 
 int ueld_main(int argc, char* argv[]);
@@ -21,11 +23,11 @@ void sig_alarm(int signo) {
 
 int main(int argc, char* argv[]) {
 	if (argc > 0 && (strcmp(argv[0], "-ueld") == 0)) {
-		ueld_main(argc, argv);
+		return ueld_main(argc, argv);
 	}
 	
 	if (ueld_readconfiglong("ueld_enable_muti_init", -1) != 1) {
-		ueld_main(argc, argv);
+		return ueld_main(argc, argv);
 	}
 	
 	/* then, use muti init... */
@@ -41,7 +43,7 @@ int main(int argc, char* argv[]) {
 		if (other_init_telinit)
 			execvp(other_init_telinit, args);
 
-		ueld_main(argc, argv);
+		return ueld_main(argc, argv);
 	}
 	
 	ueld_signal(SIGALRM, sig_alarm, 0);
@@ -89,6 +91,8 @@ int main(int argc, char* argv[]) {
 		ueld_echo("Can not load other init, load ueld!!!");
 	}
 	
-	ueld_main(argc, argv);
-	exit(0);
+	return ueld_main(argc, argv);
 }
+#else
+int main(int argc, char* argv) { return ueld_main(argc, argv); }
+#endif /* CONFIG_NO_BUILD_IN_MINIT */

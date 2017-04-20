@@ -21,6 +21,11 @@
 #include "tools.h"
 #include "restarts.h"
 
+#include "config.h"
+#ifndef CONFIG_TERM_WAITTIME
+#define CONFIG_TERM_WAITTIME 2
+#endif /* CONFIG_TERM_WAITTIME */
+
 #define MOUNTS "/proc/self/mounts"
 
 static void killproc(int signo){
@@ -156,7 +161,7 @@ int ueld_reboot(int cmd)
 	killproc(SIGTERM);
 
 	ueld_os_chvt(1);
-	sleep(2);
+	sleep(CONFIG_TERM_WAITTIME);
 
 	ueld_echo("Sending SIGKILL to all process...");
 	killproc(SIGKILL);
