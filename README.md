@@ -8,6 +8,7 @@ Ueld (Usermode Environment Loader Daemon) is a lightweight init program under Un
 
 ```
 $ cd path-to-ueld-src
+$ ./mkconfig.sh
 $ make
 $ sudo make install
 ```
@@ -15,17 +16,29 @@ The installation requires root user, so `sudo(8)` is used in this example. If yo
 
 You can use the `PREFIX` variable to set the root file system. You can use the` INSTALLDIR` variable to set the installation directory.
 
+**Compiletime config**
+
+Before you compile ueld, you need do 'compiletime config' by `./mkconfig.sh`, it will generate a config.h header which includes config macros. Run mkconfig.sh without args will make a header which includes default config.
+
+For example, if you need not Muti-Init feature, you can
+
+```
+./mkconfig.sh --no-build-in-minit
+```
+
+For more infomation, please see [this Wiki](doc/genconfig.md)
+
 **Cross compile**
 
-If you want to cross-compute Ueld, then you can use the `CROSS` variable to set the cross compiler, such as the arm-linux-gnueabihf- cross compiler, you can
+If you want to cross-compile Ueld, then you can use the `CROSS` variable to set the cross compiler, such as the arm-linux-gnueabihf- cross compiler, you can
 
 ```
 $ make CROSS=arm-linux-gnueabihf-
 ```
 
-**Install for the linux system which does not use initramfs (or initrd).**
+**Install for a linux system which does not use initramfs (or initrd).**
 
-Some system dose not use initramfs. That means ueld should mount some filesystems by itself. To install ueld for these system, you need
+Some systems do not use initramfs. That means ueld should mount some filesystems by itself. To install ueld for these system, you need
 
 ```
 $ sudo make install_no_initramfs
