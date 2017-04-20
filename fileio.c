@@ -7,6 +7,7 @@
 
 #include "fileio.h"
 
+#ifdef CONFIG_MANU_GET_MNTINFO
 /* the function name 'nsa' means 'None Seekable' */
 ssize_t readnsa(int fd, char** ptr)
 {
@@ -36,3 +37,4 @@ ssize_t readnsa(int fd, char** ptr)
 	}
 	return nread;
 }
+#endif /* CONFIG_MANU_GET_MNTINFO */

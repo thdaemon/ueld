@@ -29,6 +29,10 @@ while true ; do
 		add_macro CONFIG_TERM_WAITTIME $2
 		shift 2
 		;;
+	--manu-get-mntinfo)
+		add_macro CONFIG_MANU_GET_MNTINFO
+		shift
+		;;
 	*)
 		shift
 		;;

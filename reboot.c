@@ -15,6 +15,10 @@
 #include <sys/mount.h>
 #include <sys/wait.h>
 
+#ifndef CONFIG_MANU_GET_MNTINFO
+#include <mntent.h>
+#endif /* CONFIG_MANU_GET_MNTINFO */
+
 #include "os/pw.h"
 #include "os/chvt.h"
 #include "fileio.h"
@@ -22,11 +26,18 @@
 #include "restarts.h"
 
 #include "config.h"
+
 #ifndef CONFIG_TERM_WAITTIME
 #define CONFIG_TERM_WAITTIME 2
 #endif /* CONFIG_TERM_WAITTIME */
 
-#define MOUNTS "/proc/self/mounts"
+#define MOUNTS "/etc/mtab"
+
+#ifdef LINUX
+#define MOUNTS_LINUX "/proc/self/mounts"
+#else
+#define MOUNTS_LINUX MOUNTS
+#endif /* LINUX */
 
 static void killproc(int signo){
 	DIR* dir;
@@ -46,9 +57,40 @@ static void killproc(int signo){
 	closedir(dir);
 }
 
-static int ueld_umount(char* info)
+static int _ueld_umount(char* fsname, char* dir, char* type)
 {
 	int fd;
+
+	ueld_print("Trying to unmount %s\n", dir);
+
+	if ((fd = open(dir, O_RDONLY)) >= 0) {
+		syncfs(fd);
+		close(fd);
+	}
+
+	if (umount(dir) == 0)
+		return 0;
+
+	if (mount(fsname, dir, type, MS_MGC_VAL|MS_RDONLY|MS_REMOUNT, NULL) < 0) {
+		/* EINVAL means that the filesystem is not mounted. */
+		if (errno != EINVAL) {
+			ueld_print("Re-mount %s failed (%s), system will"
+			           " not poweroff or poweroff unsafely if"
+			           " the it can not be fixup later.\n",
+			           dir, strerror(errno));
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+#ifdef CONFIG_MANU_GET_MNTINFO
+#ifndef LINUX
+#error "CONFIG_MANU_GET_MNTINFO only support Linux platform."
+#endif /* LINUX */
+static int ueld_umount(char* info)
+{
 	char *src, *target, *type;
 
 	src = info;
@@ -57,35 +99,7 @@ static int ueld_umount(char* info)
 	type = strchr(target, ' ');
 	*type++ = 0;
 
-	ueld_print("Trying to unmount %s\n", target);
-
-	if ((fd = open(target, O_RDONLY)) >= 0) {
-		syncfs(fd);
-		close(fd);
-	}
-
-	if (umount(target) == 0)
-		return 0;
-
-/*
-	if (strcmp(target, "/") != 0) {
-		if (umount(target) < 0) {
-			ueld_print("Unmounting %s failed (%s), trying to remount it to read-only.\n", target, strerror(errno));
-		} else {
-			return 0;
-		}
-	}
-*/
-
-	if (mount(src, target, type, MS_MGC_VAL|MS_RDONLY|MS_REMOUNT, NULL) < 0) {
-		/* EINVAL means that the filesystem is not mounted. */
-		if (errno != EINVAL) {
-			ueld_print("Re-mount %s failed (%s), system will not poweroff or poweroff unsafely if the it can not be fixup later.\n", target, strerror(errno));
-			return -1;
-		}
-	}
-
-	return 0;
+	return _ueld_umount(src, target, type);
 }
 
 static char* readline(char* buffer, char** next)
@@ -124,28 +138,72 @@ static int _umount_all(char* mntinfo, size_t length)
 	return umount_fail_cnt;
 }
 
-static int umount_all(char* mntinfo, size_t length)
+static int umount_all()
 {
-	int umount_fail_cnt, n;
+	int fd, umount_fail_cnt, n;
+	off_t length;
+	char* buffer;
+
+	if ((fd = open(MOUNTS_LINUX, O_RDONLY)) < 0) {
+		ueld_print("open: %s", strerror(errno));
+		return -1;
+	}
+
+	if ((length = readnsa(fd, &buffer)) < 0) {
+		ueld_print("read: %s", strerror(errno));
+		return -1;
+	}
+
+	if (realloc(buffer, length + 1) == 0) {
+		ueld_print("realloc mem failed.");
+		return -1;
+	}
+	buffer[length] = 0;
+	close(fd);
+
+	length++;
 
 	n = 0;
-	if ((umount_fail_cnt = _umount_all(mntinfo, length)) > 0)
+	if ((umount_fail_cnt = _umount_all(buffer, length)) > 0)
 		n = umount_fail_cnt;
 
 	for (int i = 0; i < n; i++) {
-		if ((umount_fail_cnt = _umount_all(mntinfo, length)) == 0)
+		if ((umount_fail_cnt = _umount_all(buffer, length)) == 0)
 			break;
 	}
 
+	free(buffer);
+
 	return umount_fail_cnt;
 }
+#else
+static int umount_all()
+{
+	FILE* mnt;
+	struct mntent* ent;
+	unsigned int umount_fail_cnt;
+
+	if ((mnt = setmntent(MOUNTS_LINUX, "r")) == NULL)
+		mnt = setmntent(MOUNTS, "r");
+
+	if (mnt == NULL)
+		return -1;
+
+	umount_fail_cnt = 0;
+	while ((ent = getmntent(mnt)) != NULL) {
+		if (_ueld_umount(ent->mnt_fsname, ent->mnt_dir, ent->mnt_type) < 0)
+			umount_fail_cnt++;
+	}
+
+	endmntent(mnt);
+	return umount_fail_cnt;
+}
+#endif /* CONFIG_MANU_GET_MNTINFO */
 
 int ueld_reboot(int cmd)
 {
-	int fd, status;
-	off_t length;
+	int status;
 	pid_t pid;
-	char* buffer;
 
 	if (getpid() != 1) {
 		ueld_echo("Must run as pid 1");
@@ -179,24 +237,7 @@ int ueld_reboot(int cmd)
 
 	ueld_echo("Unmounting/Re-mounting file systems...");
 
-	if ((fd = open(MOUNTS, O_RDONLY)) < 0) {
-		ueld_print("open: %s", strerror(errno));
-		return -1;
-	}
-
-	if ((length = readnsa(fd, &buffer)) < 0) {
-		ueld_print("read: %s", strerror(errno));
-		return -1;
-	}
-
-	if (realloc(buffer, length + 1) == 0) {
-		ueld_print("realloc mem failed.");
-		return -1;
-	}
-	buffer[length] = 0;
-	close(fd);
-
-	if ((umount_all(buffer, length + 1) != 0) && (ueld_readconfiglong("ueld_must_remount_before_poweroff", -1) == 1)) {
+	if ((umount_all() != 0) && (ueld_readconfiglong("ueld_must_remount_before_poweroff", -1) == 1)) {
 		ueld_echo("Remount some filesystems failed, droping to a shell...");
 		char* sh = ueld_readconfig("system_shell");
 		if (!sh)
@@ -205,8 +246,6 @@ int ueld_reboot(int cmd)
 
 		return -1;
 	}
-
-	free(buffer);
 
 	ueld_echo("Doing poweroff...");
 	if (ueld_os_reboot(cmd) < 0)
