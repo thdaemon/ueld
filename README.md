@@ -23,7 +23,7 @@ Before you compile ueld, you need do 'compiletime config' by `./mkconfig.sh`, it
 For example, if you need not Muti-Init feature, you can
 
 ```
-./mkconfig.sh --no-build-in-minit
+$ ./mkconfig.sh --no-build-in-minit
 ```
 
 For more infomation, please see [this Wiki](doc/genconfig.md)
