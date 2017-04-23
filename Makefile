@@ -27,9 +27,13 @@ ueld : $(OBJS)
 	@echo "  STRIP	$@"
 	@$(CROSS)$(STRIP) -s $@
 
-%.o : %.c
+%.o : %.c config.h
 	@echo "  CC	$@"
 	@$(CROSS)$(CC) -c -o $@ $(CFLAG) $<
+
+config.h:
+	@echo "Please use ./mkconfig.sh to generate a config header."
+	@false
 
 install_ueld_executable : ueld
 	mkdir -p $(PREFIX)$(INSTALLDIR)
@@ -64,4 +68,4 @@ test:
 	@echo "FIXME: Need a test target"
 
 clean:
-	rm -f *.o os/$(UELD_OS)/*.o ueld
+	rm -f *.o os/$(UELD_OS)/*.o config.h ueld
