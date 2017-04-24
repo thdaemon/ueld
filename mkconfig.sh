@@ -3,10 +3,7 @@
 add_macro()
 {
 	local line="#define $1"
-
-	if [ "$2" != "" ]; then
-		line="$line $2"
-	fi
+	[ "$2" != "" ] && line="$line $2"
 
 	echo $line >> config.h
 }
@@ -20,23 +17,15 @@ EOF
 while true ; do
 	[ "$1" = "" ] && break
 
-	case "$1" in
-	--no-build-in-minit)
-		add_macro CONFIG_NO_BUILD_IN_MINIT
-		shift
-		;;
-	--term-waittime)
-		add_macro CONFIG_TERM_WAITTIME $2
-		shift 2
-		;;
-	--manu-get-mntinfo)
-		add_macro CONFIG_MANU_GET_MNTINFO
-		shift
-		;;
-	*)
-		shift
-		;;
-	esac
+	value=${1#*=}
+	[ "$value" = "$1" ] && value=''
+
+	macro=`expr substr ${1%=*} 3 999`
+	macro=`echo $macro | tr "a-z-" "A-Z_"`
+	macro="CONFIG_$macro"
+	add_macro $macro $value
+
+	shift
 done
 
 cat >> config.h << EOF
