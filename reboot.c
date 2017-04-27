@@ -243,14 +243,14 @@ int ueld_reboot(int cmd)
 	ueld_echo("Sending SIGTERM to all process...");
 	killproc(SIGTERM);
 
-	ueld_os_chvt(1);
+	ueld_chvt();
 	sleep(CONFIG_TERM_WAITTIME);
 
 	ueld_echo("Sending SIGKILL to all process...");
 	killproc(SIGKILL);
 	killproc(SIGKILL);
 
-	ueld_os_chvt(1);
+	ueld_chvt();
 
 	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {}
 
