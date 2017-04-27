@@ -13,13 +13,15 @@
 
 #ifdef LINUX
 #include <sys/prctl.h>
-#endif // LINUX
+#endif /* LINUX */
 
 #include "reboot.h"
 #include "os/pw.h"
 #include "os/ctrlaltdel.h"
 #include "tools.h"
 #include "respawn.h"
+
+#include "config.h"
 
 static void sig_term(int signo)
 {
@@ -74,7 +76,7 @@ int ueld_main(int argc, char* argv[])
 
 #ifdef LINUX
 	prctl(PR_SET_NAME, "ueld", 0, 0);
-#endif // LINUX
+#endif /* LINUX */
 
 	ueld_unblock_signal(SIGUSR1);
 
@@ -123,12 +125,14 @@ int ueld_main(int argc, char* argv[])
 	} else if (fd > 0) {
 		close(fd);
 	}
-#endif // LINUX
+#endif /* LINUX */
 
 	ueld_closeconfig();
 
 	while (1) {
 		if((pid = wait(&status)) > 0) {
+			if (!(WIFEXITED(status)) && !(WIFSIGNALED(status)))
+				continue;
 #ifndef CONFIG_RESPAWN_NO_IGN_FAIL_PROC
 			if ((WIFEXITED(status)) && (WEXITSTATUS(status) == EXIT_FAILURE)) {
 				clearpid(pid);
