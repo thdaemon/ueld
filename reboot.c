@@ -140,6 +140,16 @@ static int umount_all(char* mntinfo, size_t length)
 	return umount_fail_cnt;
 }
 
+#ifndef CONFIG_CONSOLE_VT
+#define CONFIG_CONSOLE_VT 1
+#endif /* CONFIG_CONSOLE_VT */
+void ueld_chvt()
+{
+	int vt = (int)ueld_readconfiglong("ueld_console_vt", CONFIG_CONSOLE_VT);
+	if (vt)
+		ueld_os_chvt(vt);
+}
+
 int ueld_reboot(int cmd)
 {
 	int fd, status;
@@ -152,7 +162,7 @@ int ueld_reboot(int cmd)
 		return -1;
 	}
 
-	ueld_os_chvt(1);
+	ueld_chvt();
 
 	clearpid(0);
 	ueld_closeconfig();
