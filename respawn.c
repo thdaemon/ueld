@@ -12,22 +12,22 @@
 
 #include "tools.h"
 
-#define RESTARTS_FILE "/etc/ueld/restarts.list"
+#define RESPAWN_FILE "/etc/ueld/respawn.list"
 #define MAX_APP 32
 
-struct restart_app {
+struct respawn_app {
 	int vt;
 	pid_t pid;
 	char* cmd;
 };
 
-static struct restart_app apps[MAX_APP];
+static struct respawn_app apps[MAX_APP];
 static unsigned int appssz = 0;
 
 static size_t length;
-static char* restarts;
+static char* respawn;
 
-static void runapp(struct restart_app* app)
+static void runapp(struct respawn_app* app)
 {
 	pid_t pid;
 
@@ -41,26 +41,26 @@ static void runapp(struct restart_app* app)
 	app->pid = pid;
 }
 
-void restarts_init()
+void respawn_init()
 {
 	int fd;
 	char *p, *vt, *cmd;
 
-	if ((fd = open(RESTARTS_FILE, O_RDONLY)) < 0)
+	if ((fd = open(RESPAWN_FILE, O_RDONLY)) < 0)
 		return;
 
 	length = lseek(fd, 0, SEEK_END) + 1;
-	restarts = mmap(NULL, length, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+	respawn = mmap(NULL, length, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
 
-	if (!restarts) {
+	if (!respawn) {
 			close(fd);
 			return;
 	}
 
-	restarts[length - 1] = 0;
+	respawn[length - 1] = 0;
 	close(fd);
 
-	p = restarts;
+	p = respawn;
 
 	while (1) {
 		cmd = strchr(p, ':');
@@ -83,10 +83,10 @@ void restarts_init()
 	}
 
 	if (!appssz)
-		munmap(restarts, length);
+		munmap(respawn, length);
 }
 
-void restartpid(pid_t pid)
+void respawnpid(pid_t pid)
 {
 	for (int i = 0; i < appssz; i++) {
 		if (apps[i].pid == pid) {
@@ -99,7 +99,7 @@ void restartpid(pid_t pid)
 void clearpid(pid_t pid)
 {
 	if (pid == 0) {
-		munmap(restarts, length);
+		munmap(respawn, length);
 		appssz = 0;
 	}
 

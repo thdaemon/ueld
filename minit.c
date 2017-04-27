@@ -8,14 +8,14 @@
 #include <termios.h>
 
 #include "tools.h"
-#include "restarts.h"
+#include "respawn.h"
 
 #include "config.h"
 
+int ueld_main(int argc, char* argv[]);
+
 #ifndef CONFIG_NO_BUILD_IN_MINIT
 int timeout = 0;
-
-int ueld_main(int argc, char* argv[]);
 
 void sig_alarm(int signo) {
 	timeout = 1;
@@ -94,5 +94,5 @@ int main(int argc, char* argv[]) {
 	return ueld_main(argc, argv);
 }
 #else
-int main(int argc, char* argv) { return ueld_main(argc, argv); }
+int main(int argc, char* argv[]) { return ueld_main(argc, argv); }
 #endif /* CONFIG_NO_BUILD_IN_MINIT */

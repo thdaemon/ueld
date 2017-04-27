@@ -19,7 +19,7 @@
 #include "os/pw.h"
 #include "os/ctrlaltdel.h"
 #include "tools.h"
-#include "restarts.h"
+#include "respawn.h"
 
 static void sig_term(int signo)
 {
@@ -86,7 +86,7 @@ int ueld_main(int argc, char* argv[])
 
 	if (argc > 0 && (strcmp(argv[0], "-ueld") != 0)) {
 		ueld_run("/etc/ueld/sysinit.sh", URF_WAIT, 0, NULL);
-		restarts_init();
+		respawn_init();
 		ueld_run("/etc/ueld/sysloaded.sh", URF_NOOUTPUT, 0, NULL);
 	}
 
@@ -129,11 +129,13 @@ int ueld_main(int argc, char* argv[])
 
 	while (1) {
 		if((pid = wait(&status)) > 0) {
+#ifndef CONFIG_RESPAWN_NO_IGN_FAIL_PROC
 			if ((WIFEXITED(status)) && (WEXITSTATUS(status) == EXIT_FAILURE)) {
 				clearpid(pid);
 				continue;
 			}
-			restartpid(pid);
+#endif /* CONFIG_RESPAWN_NO_IGN_FAIL_PROC */
+			respawnpid(pid);
 		}
 	}
 

@@ -23,7 +23,7 @@
 #include "os/chvt.h"
 #include "fileio.h"
 #include "tools.h"
-#include "restarts.h"
+#include "respawn.h"
 
 #include "config.h"
 
@@ -177,7 +177,7 @@ static int umount_all()
 	return umount_fail_cnt;
 }
 #else
-/
+/*
  * TODO: getmntent() may cause a problem, but I have not met it. And
  *       getmntent() is portable, so I use it.
  *       When I get a mountent, and I umount it, then the '/etc/mtab'
@@ -215,6 +215,16 @@ static int umount_all()
 }
 #endif /* CONFIG_MANU_GET_MNTINFO */
 
+#ifndef CONFIG_CONSOLE_VT
+#define CONFIG_CONSOLE_VT 1
+#endif /* CONFIG_CONSOLE_VT */
+void ueld_chvt()
+{
+	int vt = (int)ueld_readconfiglong("ueld_console_vt", CONFIG_CONSOLE_VT);
+	if (vt)
+		ueld_os_chvt(vt);
+}
+
 int ueld_reboot(int cmd)
 {
 	int status;
@@ -225,7 +235,7 @@ int ueld_reboot(int cmd)
 		return -1;
 	}
 
-	ueld_os_chvt(1);
+	ueld_chvt();
 
 	clearpid(0);
 	ueld_closeconfig();
