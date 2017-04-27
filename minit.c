@@ -8,7 +8,7 @@
 #include <termios.h>
 
 #include "tools.h"
-#include "restarts.h"
+#include "respawn.h"
 
 #include "config.h"
 

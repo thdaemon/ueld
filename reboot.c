@@ -23,7 +23,7 @@
 #include "os/chvt.h"
 #include "fileio.h"
 #include "tools.h"
-#include "restarts.h"
+#include "respawn.h"
 
 #include "config.h"
 
@@ -177,7 +177,7 @@ static int umount_all()
 	return umount_fail_cnt;
 }
 #else
-/
+/*
  * TODO: getmntent() may cause a problem, but I have not met it. And
  *       getmntent() is portable, so I use it.
  *       When I get a mountent, and I umount it, then the '/etc/mtab'
