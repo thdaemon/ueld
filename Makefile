@@ -11,7 +11,7 @@ PREFIX :=
 INSTALLDIR := /usr/lib/ueld/ueld-$(UELD_VERSION)
 ETCDIR := $(PREFIX)/etc/ueld
 
-OBJS := main.o minit.o fileio.o reboot.o tools.o restarts.o os/$(UELD_OS)/pw.o os/$(UELD_OS)/chvt.o os/$(UELD_OS)/ctrlaltdel.o
+OBJS := main.o minit.o fileio.o reboot.o tools.o respawn.o os/$(UELD_OS)/pw.o os/$(UELD_OS)/chvt.o os/$(UELD_OS)/ctrlaltdel.o
 CROSS :=
 CC := gcc
 STRIP := strip
