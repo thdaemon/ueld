@@ -1,5 +1,4 @@
-
-**警告**：此文件的英文版本已经经过了修改，然而中文版本却没有更新，此文件内容已经与英文版本脱节，现在，中文版本的内容可能已经过时或存在错误
+**警告** 中文版本需要更新翻译
 
 查看 [英文版本](README.md)
 
@@ -11,6 +10,7 @@ Ueld (用户态环境加载器守护进程) 是一个轻量级的 Unix/Linux 环
 
 ```
 $ cd path-to-ueld-src
+$ ./mkconfig.sh
 $ make
 $ sudo make install
 ```
@@ -19,12 +19,32 @@ $ sudo make install
 
 可使用 `PREFIX` 变量设置根文件系统，可使用 `INSTALLDIR` 变量设置安装目录。
 
+**编译时配置**
+
+Before you compile ueld, you need do 'compiletime config' by `./mkconfig.sh`, it will generate a config.h header which includes config macros. Run mkconfig.sh without args will make a header which includes default config.
+
+For example, if you need not Muti-Init feature, you can
+
+```
+$ ./mkconfig.sh --no-build-in-minit
+```
+
+For more infomation, please see [this Wiki](doc/genconfig.md)
+
 **交叉编译**
 
 如果你希望交叉编译 Ueld，那么你可以使用 `CROSS` 变量设置交叉编译器，例如交叉编译器为 arm-linux-gnueabihf-，你可以
 
 ```
 $ make CROSS=arm-linux-gnueabihf-
+```
+
+**Install for a linux system which does not use initramfs (or initrd).**
+
+Some systems do not use initramfs. That means ueld should mount some filesystems by itself. To install ueld for these system, you need
+
+```
+$ sudo make install_no_initramfs
 ```
 
 #### 配置和使用 Ueld

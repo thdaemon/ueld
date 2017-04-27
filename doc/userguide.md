@@ -2,7 +2,7 @@
 
 Switch language: [简体中文](zh_CN/userguide.md)
 
-Ueld Version: 0.34
+Ueld Version: 0.36
 
 #### programs and tools
 
@@ -34,7 +34,7 @@ $(PRIFIX}/sbin/ueldctl -> ${PRIFIX}${INSTALLDIR}/ueldctl
 >
 >/etc/ueld/syshalt.sh
 >
->/etc/ueld/restarts.list
+>/etc/ueld/respawn.list
 >
 >/etc/ueld/ctrlaltdel.sh
 
@@ -60,6 +60,7 @@ ueld_muti_init_choose_time_out|3|When ueld_enable_muti_init is 1 (when Muti Init
 ueld_muti_init_press_keys|Ss|When ueld_enable_muti_init is 1 (when Muti Init is enabled), in the choice, the hotkey to let ueld load another init program, allowing the same time specify multiple hotkeys, case-sensitive
 ueld_path_var|blank|If it is not blank, ueld will set it to `$PATH` when `$PATH` is blank. If you want to force override `$PATH`, use ueld_override_path_var
 ueld_override_path_var|0|When it is 1, ueld will force override `$PATH` to ueld_path_var
+ueld_console_vt|CONFIG_CONSOLE_VT or 1|see [genconfig.md](genconfig.md)
 
 Note: The "default" value in the table above means that if the ueld.conf file does not include this item, ueld uses the value, rather than the direct copy of the ueld.conf file configuration when install Ueld!
 
@@ -91,7 +92,7 @@ Ueld will wait for the script to finish executing and continue running, the scri
 
 In the installation will copy a example, generally do not need to change, if you need, tou can read the comments in the script
 
-**/etc/ueld/restarts.list**
+**/etc/ueld/respawn.list**
 
 Ueld will analysis the file after completed to run the sysinit.sh, format:
 
@@ -100,7 +101,9 @@ Vt number:command line
 ...
 ```
 
-Ueld will execute the command line in each row and create it on the virtual console you specify (set the control terminal to that vt). If the vt number is 0 or blank, the control terminal is not set. After the specified command line is exited, ueld restarts the command line if it is not an application that exits with  _exit (EXIT_FAILURE), such as normal launch or received a signal.
+Ueld will execute the command line in each row and create it on the virtual console you specify (set the control terminal to that vt). If the vt number is 0 or blank, the control terminal is not set. After the specified command line is exited, ueld will respawn the command line if it is not a process that exits with  _exit (EXIT_FAILURE), such as normal exited or received a signal.
+
+If you define `CONFIG_NO_IGN_FAIL_PROC` (you can do it by mkconfig.sh), ueld will always respawn all process.
 
 An example is copied at the time of installation, which starts `getty (8)` on tty1-5, as follows
 
