@@ -1,13 +1,10 @@
-
-**警告**：此文件的英文版本已经经过了修改，然而中文版本却没有更新，此文件内容已经与英文版本脱节，现在，中文版本的内容可能已经过时或存在错误
+**警告** 此文件的中文版本需要更新翻译
 
 查看 [英文版本](../userguide.md)
 
 ### Ueld 用户手册 Wiki
 
-Ueld 版本: 0.33
-
-UELD_VERSION = 0.33
+Ueld 版本: 0.36
 
 #### 程序和工具
 
@@ -32,15 +29,15 @@ $(PRIFIX}/sbin/ueldctl -> ${PRIFIX}${INSTALLDIR}/ueldctl
 #### 配置文件和脚本
 
 >/etc/ueld/ueld.conf
-
+>
 >/etc/ueld/sysinit.sh
-
+>
 >/etc/ueld/sysloaded.sh
-
+>
 >/etc/ueld/syshalt.sh
-
->/etc/ueld/restarts.list
-
+>
+>/etc/ueld/respawn.list
+>
 >/etc/ueld/ctrlaltdel.sh
 
 **/etc/ueld/ueld.conf**
@@ -63,6 +60,9 @@ ueld_muti_init_other_init|空白|ueld_enable_muti_init 为 1 时（启用 Muti I
 ueld_muti_init_other_init_telinit|空白|ueld_enable_muti_init 为 1 时（启用 Muti Init 功能时）有效，另一个 init 软件包的 telinit 程序的绝对路径，例如 /bin/systemd
 ueld_muti_init_choose_time_out|3|ueld_enable_muti_init 为 1 时（启用 Muti Init 功能时）有效，开机时选择 init 程序时等待的最大秒数，超时则选择加载 ueld
 ueld_muti_init_press_keys|Ss|ueld_enable_muti_init 为 1 时（启用 Muti Init 功能时）有效，在选择时，让 ueld 加载另一个 init 程序的热键，允许同时指定多个热键，区分大小写
+ueld_path_var|blank|If it is not blank, ueld will set it to `$PATH` when `$PATH` is blank. If you want to force override `$PATH`, use ueld_override_path_var
+ueld_override_path_var|0|When it is 1, ueld will force override `$PATH` to ueld_path_var
+ueld_console_vt|CONFIG_CONSOLE_VT or 1|see [genconfig.md](../genconfig.md)
 
 注：上表中的“默认”值是指如果 ueld.conf 文件中不存在这一项，ueld 采用的值，而不是指的安装 Ueld 时直接复制的 ueld.conf 文件中的配置！
 
@@ -94,7 +94,7 @@ ueld 将等待该脚本执行完毕再继续运行，该脚本继承 ueld 的标
 
 在安装时会复制一份示例，一般不需要再更改了，如果需要可阅读脚本中的注释
 
-**/etc/ueld/restarts.list**
+**/etc/ueld/respawn.list**
 
 ueld 会在执行完 sysinit.sh 后解析该文件，格式：
 
@@ -104,6 +104,8 @@ vt编号:命令行
 ```
 
 ueld 会执行每一行中的命令行，并将他创建在你指定的 virtual console 上（设置控制终端为该 vt），如果vt编号为0或空白，则不设置控制终端。在指定的命令行退出后，如果不是应用程序使用 _exit(EXIT_FAILURE) 退出（例如正常推出或接受到信号而推出），那么 ueld 再次重新启动该命令行。
+
+If you define `CONFIG_NO_IGN_FAIL_PROC` (you can do it by mkconfig.sh), ueld will always respawn all process.
 
 在安装时会复制一份示例，该示例在 tty1-5 上启动 `getty(8)`，如下
 
