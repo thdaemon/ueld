@@ -129,10 +129,12 @@ int ueld_main(int argc, char* argv[])
 
 	while (1) {
 		if((pid = wait(&status)) > 0) {
+#ifndef CONFIG_RESPAWN_NO_IGN_FAIL_PROC
 			if ((WIFEXITED(status)) && (WEXITSTATUS(status) == EXIT_FAILURE)) {
 				clearpid(pid);
 				continue;
 			}
+#endif /* CONFIG_RESPAWN_NO_IGN_FAIL_PROC */
 			restartpid(pid);
 		}
 	}
