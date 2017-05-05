@@ -177,29 +177,16 @@ static int umount_all()
 	return umount_fail_cnt;
 }
 #else
-/*
- * TODO: getmntent() may cause a problem, but I have not met it. And
- *       getmntent() is portable, so I use it.
- *       When I get a mountent, and I umount it, then the '/etc/mtab'
- *       and '/proc/self/mounts' will be changed, so in this situation,
- *       can getmntent() work ok? The getmntent(3) manpage does not say
- *       it, and I test it for some systems, it is no problem, but I
- *       worry about it...
- *       getmntent() may use the stdio's buffer, so maybe problems will
- *       not be decovered when the '/etc/mtab' file is small.
- *       So, I left the CONFIG_MANU_GET_MNTINFO config, you can enable it
- *       in Linux system.
- *       Can you help me to get the answer to the question, can I use the
- *       function safely?
- */
 static int umount_all()
 {
+	int fd;
+	char* buffer;
 	FILE* mnt;
 	struct mntent* ent;
 	unsigned int umount_fail_cnt;
 
-	if ((mnt = setmntent(MOUNTS_LINUX, "r")) == NULL)
-		mnt = setmntent(MOUNTS, "r");
+	if ((mnt = mysetmntent(MOUNTS_LINUX, "r", &fd, &buffer)) == NULL)
+		mnt = mysetmntent(MOUNTS, "r", &fd, &buffer);
 
 	if (mnt == NULL)
 		return -1;
@@ -210,7 +197,7 @@ static int umount_all()
 			umount_fail_cnt++;
 	}
 
-	endmntent(mnt);
+	myendmntent(mnt, &fd, &buffer);
 	return umount_fail_cnt;
 }
 #endif /* CONFIG_MANU_GET_MNTINFO */
