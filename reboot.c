@@ -21,6 +21,7 @@
 
 #include "os/pw.h"
 #include "os/chvt.h"
+#include "os/proc.h"
 #include "fileio.h"
 #include "tools.h"
 #include "respawn.h"
@@ -39,22 +40,18 @@
 #define MOUNTS_LINUX MOUNTS
 #endif /* LINUX */
 
-static void killproc(int signo){
-	DIR* dir;
-	struct dirent* dent;
+static void killproc(int signo)
+{
+	pid_t pid;
 
-	dir = opendir("/proc");
-	dent = readdir(dir);
+	if (ueld_os_for_each_process(&pid) < 0)
+		return;
 
-	while (dent != NULL){
-		pid_t pid = atol(dent->d_name);
-		if (pid != 0 && pid != 1){
-			kill(pid, signo);
-		}
-		dent = readdir(dir);
-	}
+	do {
+		kill(pid, signo);
+	} while (ueld_os_next_process(&pid));
 
-	closedir(dir);
+	ueld_os_end_each_process();
 }
 
 static int _ueld_umount(char* fsname, char* dir, char* type)
@@ -76,7 +73,7 @@ static int _ueld_umount(char* fsname, char* dir, char* type)
 		if (errno != EINVAL) {
 			ueld_print("Re-mount %s failed (%s), system will"
 			           " not poweroff or poweroff unsafely if"
-			           " the it can not be fixup later.\n",
+			           " the problem can not be fixup later.\n",
 			           dir, strerror(errno));
 			return -1;
 		}
