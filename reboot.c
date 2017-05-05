@@ -44,12 +44,11 @@ static void killproc(int signo)
 {
 	pid_t pid;
 
-	if (ueld_os_for_each_process(&pid) < 0)
+	if (ueld_os_for_each_process() < 0)
 		return;
 
-	do {
+	while (ueld_os_next_process(&pid))
 		kill(pid, signo);
-	} while (ueld_os_next_process(&pid));
 
 	ueld_os_end_each_process();
 }
