@@ -4,9 +4,9 @@ Hardware is a x86 PC
 
 > Install need some software, but ueld do not need them, ueld only require glibc.
 >
-> git - fetch ueld source
-> make gcc - compile ueld
-> basic Unix program like cat, expr, cp, ln, etc.
+> git - fetch ueld source   
+> make gcc - compile ueld   
+> basic Unix program like cat, expr, cp, ln, etc.  
 
 ### Get source, compile and install
 
@@ -24,7 +24,8 @@ $ make && sudo make install
 
 The default config is not fully fit Ubuntu, you need fix it.
 
-1. Muti-Init ?
+#### Muti-Init ?
+
 Do you need muti-init feature? If you worry that system can not start after replace systemd by ueld, you can enable muti init. It will ask you which init will be loaded when starting system.
 
 If you do not need, ignore this!
@@ -52,9 +53,9 @@ ueld_muti_init_other_init=/lib/system/systemd
 ueld_muti_init_other_init_telinit=/lib/system/systemd
 ```
 
-2. Fixup udevd name
+#### Fixup udevd name
 
-The name of udevd in Ubuntu is /lib/system/system-udevd
+The name of udevd on Ubuntu is /lib/system/system-udevd
 
 ```
 # cd /etc/ueld
@@ -63,7 +64,7 @@ The name of udevd in Ubuntu is /lib/system/system-udevd
 
 Change `udevd --daemon` to `/lib/system/system-udevd --daemon`
 
-3. Remount root file system to read-write, and hostname problem
+#### Remount root file system to read-write, and hostname problem
 
 Ubuntu left a read-only root file system, we need re-mount it.
 
@@ -97,7 +98,7 @@ hostname `cat /etc/hostname`
 
 hostname command will set local hostname to the content in /etc/hostname, if you won't run it, hostname will keep null
 
-4. Network Interface
+#### Network Interface
 
 Ubuntu's eth0 is renamed to other, you can get it by `ifconfig -a` to get the name, and Add it in /etc/ueld/sysloaded.sh
 
@@ -111,7 +112,7 @@ dhclient XXX &
 echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 ```
 
-5¡£ The X Window
+#### The X Window
 
 on Ubuntu, startx worked badly, so I write a simple display manager.
 
@@ -138,12 +139,12 @@ Add these to /etc/ueld/sysloaded.sh before `exit 0`
 
 **NOTE**
 
-fonts may be very, you can configure your fonts by fontconfig
+fonts may be very bad, you can configure your fonts by fontconfig
 
 It is a good webpage which can solve all problems: 
 
 [Font configuration - Arch Wiki](https://wiki.archlinux.org/index.php/font_configuration)
 
-6. The others
+#### The others
 
 If you need, you can start any program in ueld's script, such as some driver, syslogd, sshd, etc.
