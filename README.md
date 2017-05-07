@@ -54,6 +54,12 @@ After the installation, i suggest you configure Ueld immediately, refer to [this
 
 If you first install Ueld, then the Ueld configuration file is set to create `getty(8)` on tty1-5 to wait for login, which may not be suitable for your situation, so do not forget to configure it. Noteworthy, when you install Ueld, if the configuration file in the corresponding directory is already exists, it will not overwrite the previous configuration file, even if the new version of the default configuration may be changed.
 
+#### Install Examples
+
+Now, we have some examles to show how to install ueld on your system!
+
+[Install on Ubuntu 16.04.1](doc/install_on_ubuntu.md)
+
 #### Advantages of Ueld
 
 - Ueld is very lightweight and simple, "small is both beautiful". The huge software is always uncomfortable, so I try to avoid Ueld becoming a huge software.
