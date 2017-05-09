@@ -1,0 +1,2 @@
+UELD_OS := freebsd 
+UELD_OS_CFLAGS := -DBSD 
