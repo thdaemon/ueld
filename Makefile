@@ -1,9 +1,9 @@
 UELD_OS := unkown
 include version
 
-ifeq "$(PLATFORM)" ""
- PLATFORM := $(shell ./systype.sh)
-endif
+#ifeq "$(PLATFORM)" ""
+# PLATFORM := $(shell ./systype.sh)
+# endif
 include Make.defines.$(PLATFORM)
 
 
@@ -13,7 +13,7 @@ ETCDIR := $(PREFIX)/etc/ueld
 
 OBJS := main.o minit.o fileio.o reboot.o tools.o respawn.o os/$(UELD_OS)/pw.o os/$(UELD_OS)/chvt.o os/$(UELD_OS)/ctrlaltdel.o os/$(UELD_OS)/proc.o
 CROSS :=
-CC := gcc
+CC := cc
 STRIP := strip
 
 CFLAG := -Wall -O2 -std=c99 $(UELD_OS_CFLAGS)

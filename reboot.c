@@ -12,11 +12,16 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
+
+#ifdef BSD
+#include <sys/param.h>
+#endif /* BSD */
+
 #include <sys/mount.h>
 #include <sys/wait.h>
 
 #ifndef CONFIG_MANU_GET_MNTINFO
-#include <mntent.h>
+//#include <mntent.h>
 #endif /* CONFIG_MANU_GET_MNTINFO */
 
 #include "os/pw.h"
@@ -176,6 +181,7 @@ static int umount_all()
 #else
 static int umount_all()
 {
+/*
 	int fd;
 	char* buffer;
 	FILE* mnt;
@@ -196,6 +202,8 @@ static int umount_all()
 
 	myendmntent(mnt, &fd, &buffer);
 	return umount_fail_cnt;
+*/
+return 0;
 }
 #endif /* CONFIG_MANU_GET_MNTINFO */
 
