@@ -11,12 +11,12 @@
 
 DIR* dir;
 
-int ueld_os_for_each_process(pid_t* pid)
+int ueld_os_for_each_process()
 {
 	if ((dir = opendir("/proc")) == NULL)
 		return -1;
 
-	return ueld_os_next_process(pid);
+	return 0;
 }
 
 int ueld_os_next_process(pid_t* pid)
