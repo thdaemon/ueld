@@ -16,6 +16,8 @@ The installation requires root user, so `sudo(8)` is used in this example. If yo
 
 You can use the `PREFIX` variable to set the root file system. You can use the` INSTALLDIR` variable to set the installation directory.
 
+> Note: When you use both `PREFIX` and `INSTALLDIR`, the install path is `${PREFIX}/${INSTALLDIR}`, in other word, `INSTALLDIR` should not include the path prefix.
+
 **Compiletime config**
 
 Before you compile ueld, you need do 'compiletime config' by `./mkconfig.sh`, it will generate a config.h header which includes config macros. Run mkconfig.sh without args will make a header which includes default config.
@@ -30,7 +32,7 @@ For more infomation, please see [this Wiki](doc/genconfig.md)
 
 **Cross compile**
 
-If you want to cross-compile Ueld, then you can use the `CROSS` variable to set the cross compiler, such as the arm-linux-gnueabihf- cross compiler, you can
+If you want to cross-compile Ueld, you can use the `CROSS` variable to set the cross compiler name, for example, if you want to use 'arm-linux-gnueabihf-' cross compiler, you can
 
 ```
 $ make CROSS=arm-linux-gnueabihf-
@@ -46,11 +48,17 @@ $ sudo make install_no_initramfs
 
 #### Configure and use Ueld
 
-After the installation, i suggest you configure Ueld immediately, refer to [this wiki](doc/userguide.md)
+After the installation, i suggest you configure Ueld immediately, refer to [this Wiki](doc/userguide.md)
 
 **Ueld manual is also included in this wiki;** Uninstallation instructions are also included in this wiki.
 
 If you first install Ueld, then the Ueld configuration file is set to create `getty(8)` on tty1-5 to wait for login, which may not be suitable for your situation, so do not forget to configure it. Noteworthy, when you install Ueld, if the configuration file in the corresponding directory is already exists, it will not overwrite the previous configuration file, even if the new version of the default configuration may be changed.
+
+#### Install Examples
+
+Now, we have some examles to show how to install ueld on your system!
+
+[Install on Ubuntu 16.04.1](doc/install_on_ubuntu.md)
 
 #### Advantages of Ueld
 
