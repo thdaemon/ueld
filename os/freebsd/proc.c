@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/errno.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/stat.h>
@@ -28,15 +27,16 @@ int ueld_os_for_each_process()
 	len += sizeof(struct kinfo_proc) * 10;
 	if ((kp = malloc(len)) == NULL) {
 		errno = ENOMEM;
-		return -1
+		return -1;
 	}
 
 	if (sysctl(mib, 3, kp, &len, NULL, 0) == -1) {
-		free(kp)
+		free(kp);
 		return -1;
 	}
 
 	count = len / sizeof(struct kinfo_proc);
+	now = 0;
 
 	return 0;
 }
