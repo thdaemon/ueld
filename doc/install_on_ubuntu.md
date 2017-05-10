@@ -133,28 +133,60 @@ echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 
 ### The X Window
 
-on Ubuntu, startx worked badly, so I write a simple display manager.
+on Ubuntu 16.04, startx worked badly (a user who isn't root use startx will catch a error which may is threw by OpenGL), so I write a simple display manager to start X.
 
 ```
-$ git clone https://gist.github.com/7db0df66171aae5855f9b84c97a4a3b7.git --depth=1
-$ cd 7db0df66171aae5855f9b84c97a4a3b7
-$ vi mydm.c
-
-	change 'user' to your user name
-	and use 'unity' replace 'startxfce4' if you use unity :-)
-	if you use other DE, please change it!
- 
-$ gcc -Wall -O2 -std=c99 -D_POSIX_C_SOURCE=200819L -o mydm mydm.c -lX11
-$ sudo su
-[sudo] password for xxx: 
-# mv mydm /opt/mydm
+$ git clone https://github.com/thdaemon/mydm --depth=1
+$ cd mydm
+$ make
+$ sudo make install
 ```
 
 Add these to /etc/ueld/sysloaded.sh before `exit 0`
 
 ```
-/opt/mydm &
+/opt/mydm -u user_name -c unity &
 ```
+
+user_name is your user's name, unity is your de, other DEs and WMs like:
+
+DE/WM|Start Command
+-----|-------------
+XFCE4|startxfce4
+LXDE|startlxde
+Gnome3|gnome-session
+KDE|startkde4, etc.
+Unity|unity
+Openbox|openbox
+i3|i3wm
+
+For more usages, run `/opt/mydm -h`, for example, if you want to run fcitx and some programs after start x client, you can
+
+Firstly, create a script
+
+```
+# cat > /opt/myde_autostart.sh << EOF
+#!/bin/sh
+
+fcitx &
+other-programs &
+exit 0
+EOF
+# chmod +x /opt/myde_autostart.sh
+```
+Afert doing these, we can run mydm like this
+
+```
+# /opt/mydm -u user_name -c XXXX -r /opt/myde_autostart.sh
+```
+
+And you can also use it to run your own DE, for example, you can run a pancel and run a wm (metacity is a wm)
+
+```
+# /opt/mydm -u user_name -c pancel_name_or_start_script -r metacity
+```
+
+> Warning: mydm don't support `xauth` now, so it only fit personal user like Desktop PC. If it is required that many users login your system in a same time, do not use it!
 
 **NOTE**
 
