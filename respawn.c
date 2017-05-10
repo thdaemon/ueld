@@ -53,8 +53,8 @@ void respawn_init()
 	respawn = mmap(NULL, length, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
 
 	if (!respawn) {
-			close(fd);
-			return;
+		close(fd);
+		return;
 	}
 
 	respawn[length - 1] = 0;

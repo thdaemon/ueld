@@ -130,7 +130,7 @@ int ueld_main(int argc, char* argv[])
 	ueld_closeconfig();
 
 	while (1) {
-		if((pid = wait(&status)) > 0) {
+		if ((pid = wait(&status)) > 0) {
 			if (!(WIFEXITED(status)) && !(WIFSIGNALED(status)))
 				continue;
 #ifndef CONFIG_RESPAWN_NO_IGN_FAIL_PROC

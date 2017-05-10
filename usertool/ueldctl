@@ -47,11 +47,10 @@ for _tag in `seq $#` ; do
 	esac
 done
 
-if [ "$SIGNAL" = '' ]; then
-	exit 0
-fi
+[ "$SIGNAL" = '' ] && exit 0
 
 if ! kill $SIGNAL 1 ; then
 	echo "Failed to call init. Do you use the ueld?" >&2
+	exit 1
 fi
 
