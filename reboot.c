@@ -205,16 +205,9 @@ static int umount_all()
 #ifndef CONFIG_CONSOLE_VT
 #define CONFIG_CONSOLE_VT 1
 #endif /* CONFIG_CONSOLE_VT */
-void ueld_chvt()
-{
-	int vt = (int)ueld_readconfiglong("ueld_console_vt", CONFIG_CONSOLE_VT);
-	if (vt)
-		ueld_os_chvt(vt);
-}
-
 int ueld_reboot(int cmd)
 {
-	int status;
+	int status, vt;
 	pid_t pid;
 
 	if (getpid() != 1) {
@@ -222,7 +215,9 @@ int ueld_reboot(int cmd)
 		return -1;
 	}
 
-	ueld_chvt();
+	vt = (int)ueld_readconfiglong("ueld_console_vt", CONFIG_CONSOLE_VT);
+
+	ueld_os_chvt(vt);
 
 	clearpid(0);
 	ueld_closeconfig();
@@ -230,14 +225,14 @@ int ueld_reboot(int cmd)
 	ueld_echo("Sending SIGTERM to all process...");
 	killproc(SIGTERM);
 
-	ueld_chvt();
+	ueld_os_chvt(vt);
 	sleep(CONFIG_TERM_WAITTIME);
 
 	ueld_echo("Sending SIGKILL to all process...");
 	killproc(SIGKILL);
 	killproc(SIGKILL);
 
-	ueld_chvt();
+	ueld_os_chvt(vt);
 
 	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {}
 
