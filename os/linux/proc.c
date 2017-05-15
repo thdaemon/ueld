@@ -28,7 +28,7 @@ reread:
 		return 0;
 
 	pid_t p = atol(dent->d_name);
-	if (p != 0 && p != 1){
+	if (p != 0) {
 		*pid = p;
 	} else {
 		goto reread;
