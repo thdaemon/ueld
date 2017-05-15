@@ -11,18 +11,6 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
-
-/* These codes will be moved to os/freebsd/mnt.c */
-// 
-//
-//#ifdef BSD
-//#include <sys/param.h>
-//#endif /* BSD */
-
-//#include <sys/mount.h>
-//
-//
-
 #include <sys/wait.h>
 
 #include "os/pw.h"

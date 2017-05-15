@@ -6,7 +6,7 @@
 int ueld_os_reboot(int cmd)
 {
 	int howto = 0;
-	
+
 	switch (cmd) {
 	case UELD_OS_PW_POWER_OFF:
 		howto = RB_POWEROFF;
@@ -17,6 +17,6 @@ int ueld_os_reboot(int cmd)
 	default:
 		break;
 	}
-	
+
 	return reboot(howto);
 }
