@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
+#include <sys/user.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
@@ -14,7 +15,8 @@ int now, count = 0;
 
 int ueld_os_for_each_process()
 {
-	int len, mib[4];
+	int mib[4];
+	size_t len;
 
 	mib[0] = CTL_KERN;
 	mib[1] = KERN_PROC;
@@ -46,7 +48,7 @@ int ueld_os_next_process(pid_t* pid)
 	if (now >= count)
 		return 0;
 
-	*pid = kp[now].kp_proc.p_pid;
+	*pid = kp[now].ki_pid;
 	now++;
 	return 1;
 }

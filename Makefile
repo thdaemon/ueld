@@ -1,9 +1,9 @@
 UELD_OS := unkown
 include version
 
-ifeq "$(PLATFORM)" ""
- PLATFORM !=./systype.sh
-endif
+#ifeq "$(PLATFORM)" ""
+# PLATFORM !=./systype.sh
+#endif
 include Make.defines.$(PLATFORM)
 
 
@@ -13,9 +13,9 @@ ETCDIR := $(PREFIX)/etc/ueld
 
 OBJS := main.o minit.o fileio.o reboot.o tools.o respawn.o os/$(UELD_OS)/pw.o os/$(UELD_OS)/chvt.o os/$(UELD_OS)/ctrlaltdel.o os/$(UELD_OS)/proc.o os/$(UELD_OS)/mnt.o
 CROSS :=
-ifeq "$(CC)" ""
- CC := gcc
-endif
+#ifeq "$(CC)" ""
+# CC := gcc
+#endif
 STRIP := strip
 
 CFLAG := -Wall -O2 -std=c99 $(UELD_OS_CFLAGS)
@@ -29,7 +29,8 @@ ueld : $(OBJS)
 	@echo "  STRIP	$@"
 	@$(CROSS)$(STRIP) -s $@
 
-%.o : %.c config.h
+.c.o:
+#%.o : %.c config.h
 	@echo "  CC	$@"
 	@$(CROSS)$(CC) -c -o $@ $(CFLAG) $<
 

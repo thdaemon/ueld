@@ -1,6 +1,3 @@
-#define _POSIX_C_SOURCE 200819L
-#define _XOPEN_SOURCE 700
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +18,7 @@ static int _ueld_umount(struct statfs* fs)
 
 	ueld_print("Trying to unmount %s\n", dir);
 
-	if (umount(dir, 0) == 0)
+	if (unmount(dir, 0) == 0)
 		return 0;
 
 	type = fs->f_fstypename;
@@ -53,7 +50,7 @@ int ueld_os_umount_all()
 		return -1;
 	}
 
-	if ((getfsstat(buf, count * sizeof(struct statfs), MNT_NOWAIT)) < 0)
+	if ((getfsstat(fs, count * sizeof(struct statfs), MNT_NOWAIT)) < 0)
 		return -1;
 
 	for (int i = 0; i < count; i++) {

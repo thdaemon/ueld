@@ -163,7 +163,7 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 			setstdfd(devname, 0, file);
 
 #ifdef BSD
-			if (ioctl(fd0, TIOCSCTTY, (char*)vt) < 0) {
+			if (ioctl(0, TIOCSCTTY, (char*)vt) < 0) {
 				ueld_print("Could not run '%s': Set control tty error (%s)\n", file, strerror(errno));
 				_exit(EXIT_FAILURE);
 			}
