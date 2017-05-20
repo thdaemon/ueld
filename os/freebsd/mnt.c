@@ -11,10 +11,13 @@
 #include <sys/mount.h>
 #include <sys/uio.h>
 
+#include "../../tools.h"
+
 #define OPT_FSTYPE "fstype"
 #define OPT_FSPATH "fspath"
 #define OPT_FROM "from"
 
+#ifdef CONFIG_FBSD_UNMOUNTFS
 static int _ueld_umount(struct statfs* fs)
 {
 	char *dir;
@@ -42,6 +45,7 @@ static int _ueld_umount(struct statfs* fs)
 	iov[5].iov_base = fs->f_mntfromname;
 	iov[5].iov_len = strlen(fs->f_mntfromname);
 
+	/* FIXME: It did not work, always return EINVAL. why? how? */
 	if (nmount(iov, 6, MNT_RDONLY | MNT_UPDATE) < 0) {
 		ueld_print("Re-mount %s failed (%s), system will"
 		           " not poweroff or poweroff unsafely if"
@@ -91,3 +95,10 @@ int ueld_os_umount_all()
 
 	return umount_fail_cnt;
 }
+#else
+/*
+ * FreeBSD may umount filesystems by kernel itself.
+ * So I think ueld can ignore the problem.
+ */
+int ueld_os_umount_all() { return 0; }
+#endif /* CONFIG_FBSD_UNMOUNTFS */

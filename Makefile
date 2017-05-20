@@ -48,23 +48,24 @@ install_ueld_executable : ueld
 
 install_generic_etc_file:
 	mkdir -p $(ETCDIR)
+	cp -n etcfiles/generic-$(UELD_OS)/* $(ETCDIR)/
 	cp -n etcfiles/generic/* $(ETCDIR)/
 	touch $(ETCDIR)/*
 	chmod 755 $(ETCDIR)/*.sh
 
 install_no_initramfs:
-	$(MAKE) install_ueld_executable
+	@$(MAKE) install_ueld_executable
 
 	mkdir -p $(ETCDIR)
 	cp -n etcfiles/no_initramfs/* $(ETCDIR)/
 	touch $(ETCDIR)/*
 	chmod 755 $(ETCDIR)/*.sh
 
-	$(MAKE) install_generic_etc_file
+	@$(MAKE) install_generic_etc_file
 
 install:
-	$(MAKE) install_ueld_executable
-	$(MAKE) install_generic_etc_file
+	@$(MAKE) install_ueld_executable
+	@$(MAKE) install_generic_etc_file
 
 test:
 	@echo "FIXME: Need a test target"
