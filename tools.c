@@ -70,19 +70,19 @@ void ueld_print(char* fmt, ...)
 	 * See main.c, for Linux Sysrq SAK problem
 	 * And it cause a window that is not 'SAK safe'
 	 */
-#ifdef LINUX
+//#ifdef LINUX
 	if ((fd = open("/dev/console", O_NOCTTY | O_WRONLY)) < 0)
 		return;
-#else
-	fd = STDOUT_FILENO;
-#endif // LINUX
+//#else
+//	fd = STDOUT_FILENO;
+//#endif // LINUX
 
 	write(fd, "[ueld] ", 7);
 	write(fd, buff, strlen(buff));
 
-#ifdef LINUX
+//#ifdef LINUX
 	close(fd);
-#endif // LINUX
+//#endif // LINUX
 
 	va_end(ap);
 }

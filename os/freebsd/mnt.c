@@ -9,10 +9,16 @@
 
 #include <sys/param.h>
 #include <sys/mount.h>
+#include <sys/uio.h>
+
+#define OPT_FSTYPE "fstype"
+#define OPT_FSPATH "fspath"
+#define OPT_FROM "from"
 
 static int _ueld_umount(struct statfs* fs)
 {
-	char *dir, *type;
+	char *dir;
+	struct iovec iov[6];
 
 	dir = fs->f_mntonname;
 
@@ -21,9 +27,22 @@ static int _ueld_umount(struct statfs* fs)
 	if (unmount(dir, 0) == 0)
 		return 0;
 
-	type = fs->f_fstypename;
+	iov[0].iov_base = OPT_FSTYPE;
+	iov[0].iov_len = sizeof(OPT_FSTYPE);
+	iov[1].iov_base = fs->f_fstypename;
+	iov[1].iov_len = strlen(fs->f_fstypename);
 
-	if (mount(type, dir, MNT_RDONLY | MNT_UPDATE, NULL) < 0) {
+	iov[2].iov_base = OPT_FSPATH;
+	iov[2].iov_len = sizeof(OPT_FSPATH);
+	iov[3].iov_base = dir;
+	iov[3].iov_len = strlen(dir);
+
+	iov[4].iov_base = OPT_FROM;
+	iov[4].iov_len = sizeof(OPT_FROM);
+	iov[5].iov_base = fs->f_mntfromname;
+	iov[5].iov_len = strlen(fs->f_mntfromname);
+
+	if (nmount(iov, 6, MNT_RDONLY | MNT_UPDATE) < 0) {
 		ueld_print("Re-mount %s failed (%s), system will"
 		           " not poweroff or poweroff unsafely if"
 		           " the problem can not be fixup later.\n",
@@ -31,6 +50,16 @@ static int _ueld_umount(struct statfs* fs)
 		return -1;
 	}
 
+	/*
+	if (mount(type, dir, MNT_RDONLY | MNT_UPDATE, NULL) < 0) {
+		ueld_print("Re-mount %s failed (%s), system will"
+		           " not poweroff or poweroff unsafely if"
+		           " the problem can not be fixup later.\n",
+		           dir, strerror(errno));
+		return -1;
+	}
+	*/
+	
 	return 0;
 }
 
