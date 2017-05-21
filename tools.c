@@ -17,6 +17,7 @@
 #include <sys/ioctl.h>
 
 #include "tools.h"
+#include "names.h"
 
 #define MAX_ARGS 32
 
@@ -159,7 +160,7 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 
 			setsid();
 
-			snprintf(devname, sizeof(devname), "/dev/tty%d", vt);
+			snprintf(devname, sizeof(devname), VT_TTY_NAME, vt);
 			setstdfd(devname, 0, file);
 
 #ifdef BSD
@@ -190,11 +191,11 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 				ptr++;
 			}
 
-			args[argssz++] = 0;
+			args[argssz++] = NULL;
 			execvp(args[0], args);
 			free(ptr);
 		} else {
-			execl(file, file, 0);
+			execl(file, file, NULL);
 		}
 		ueld_print("Could not run '%s': execl failed(%s)\n", file, strerror(errno));
 		_exit(EXIT_FAILURE);

@@ -7,4 +7,6 @@ mount -o rw /
 
 [ -x '/etc/ueld/mountfs.sh' ] && . /etc/ueld/mountfs.sh
 
+/bin/sh /etc/rc > /dev/console 2>&1
+
 exit 0

@@ -7,6 +7,4 @@
 # Example: Start a X Window Session (Such like a display manager).
 # su -l YOUR_USER_NAME -c 'exec startx -- vt7' < /dev/tty7 > /dev/tty7 2>&1 &
 
-/bin/sh /etc/rc > /dev/console 2>&1 &
-
 exit 0
