@@ -46,6 +46,10 @@ Some systems do not use initramfs. That means ueld should mount some filesystems
 $ sudo make install_no_initramfs
 ```
 
+**On FreeBSD, you need use `gmake` instead of `make`**
+
+Compiling ueld need GNU Make.
+
 #### Configure and use Ueld
 
 After the installation, i suggest you configure Ueld immediately, refer to [this Wiki](doc/userguide.md)
@@ -59,6 +63,8 @@ If you first install Ueld, then the Ueld configuration file is set to create `ge
 Now, we have some examles to show how to install ueld on your system!
 
 [Install on Ubuntu 16.04.1](doc/install_on_ubuntu.md)
+
+[Install on FreeBSD](doc/install_on_freebsd.md)
 
 #### Advantages of Ueld
 
@@ -81,3 +87,4 @@ Now, we have some examles to show how to install ueld on your system!
 - Ueld currently dose not support reboot with parameter.
 
 - Ueld could not integrate with the existing Desktop environment gracefully now.
+ 

@@ -20,7 +20,9 @@ while true ; do
 	value=${1#*=}
 	[ "$value" = "$1" ] && value=''
 
-	macro=`expr substr ${1%=*} 3 999`
+	#macro=`expr substr ${1%=*} 3 999`
+	macro=${1%=*}
+	macro=${macro#--}
 	macro=`echo $macro | tr "a-z-" "A-Z_"`
 	macro="CONFIG_$macro"
 	add_macro $macro $value

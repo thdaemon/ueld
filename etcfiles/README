@@ -1,14 +1,20 @@
 This is ueld config files and scripts which will be installed in /etc/ueld.
 
 generic/
-	There are the generic files. The others are used in special time.
+	There are the generic files which are fit all platforms which ueld supports. The others are used in special time.
+
+generic-linux/
+	There are the generic files which are fit Linux.
+
+generic-freebsd/
+	There are the generic files which are fit FreeBSD.
 
 no_initramfs/
-	Used when you `make install_no_initramfs`
+	Used when you `make install_no_initramfs`. It fixed for linux systems which does not use initramfs.
 
 ===============================================================================
 
 Install method:
 
-	Firstly, copy special files, and then copy generic files. When a file is
-exist in ${PREFIX}/etc/ueld when copying, it won't copy it.
+	Firstly, copy special files, and then copy generic-${PLATFORM}/ files, at last copy generic/. When a file is
+exist in ${PREFIX}/etc/ueld when copying, Makefile won't copy it.

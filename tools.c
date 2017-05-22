@@ -17,6 +17,7 @@
 #include <sys/ioctl.h>
 
 #include "tools.h"
+#include "names.h"
 
 #define MAX_ARGS 32
 
@@ -70,19 +71,19 @@ void ueld_print(char* fmt, ...)
 	 * See main.c, for Linux Sysrq SAK problem
 	 * And it cause a window that is not 'SAK safe'
 	 */
-#ifdef LINUX
+//#ifdef LINUX
 	if ((fd = open("/dev/console", O_NOCTTY | O_WRONLY)) < 0)
 		return;
-#else
-	fd = STDOUT_FILENO;
-#endif // LINUX
+//#else
+//	fd = STDOUT_FILENO;
+//#endif // LINUX
 
 	write(fd, "[ueld] ", 7);
 	write(fd, buff, strlen(buff));
 
-#ifdef LINUX
+//#ifdef LINUX
 	close(fd);
-#endif // LINUX
+//#endif // LINUX
 
 	va_end(ap);
 }
@@ -159,11 +160,11 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 
 			setsid();
 
-			snprintf(devname, sizeof(devname), "/dev/tty%d", vt);
+			snprintf(devname, sizeof(devname), VT_TTY_NAME, vt);
 			setstdfd(devname, 0, file);
 
 #ifdef BSD
-			if (ioctl(fd0, TIOCSCTTY, (char*)vt) < 0) {
+			if (ioctl(0, TIOCSCTTY, (char*)vt) < 0) {
 				ueld_print("Could not run '%s': Set control tty error (%s)\n", file, strerror(errno));
 				_exit(EXIT_FAILURE);
 			}
@@ -190,11 +191,11 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 				ptr++;
 			}
 
-			args[argssz++] = 0;
+			args[argssz++] = NULL;
 			execvp(args[0], args);
 			free(ptr);
 		} else {
-			execl(file, file, 0);
+			execl(file, file, NULL);
 		}
 		ueld_print("Could not run '%s': execl failed(%s)\n", file, strerror(errno));
 		_exit(EXIT_FAILURE);

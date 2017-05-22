@@ -16,6 +16,7 @@ Name|Default Value|Description
 --manu-get-mntinfo|not define|(Only support Linux system) Manu get the mount infomation, not use the getmntent function. (This function may have a problem but is portable, see reboot.c)
 --console-vt=value|1|When system poweroffing, let ueld change to this vt.(It is usually the vt number of /dev/console) **This config can be overrided by `ueld_console_vt` in ueld.conf**
 --respawn-no-ign-fail-proc|not define|When ueld respawn a exited process, ueld will ignore the processes which exited by `_exit(EXIT_FAILURE)` if you do not define the config.
+--fbsd-unmountfs|not define|(Only support FreeBSD system) If you don't define it, ueld will not unmount filesystems before poweroff. Because FreeBSD may do it by kernel.
 
 For example, if you need not Build-in Muti-Init, and want to wait 5 seconds for the exiting process, you can
 

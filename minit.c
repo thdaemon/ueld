@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 		for (int i = 0; i < argc; i++) {
 			args[i] = argv[i];
 		}
-		args[argc] = 0;
+		args[argc] = NULL;
 
 		char* other_init_telinit = ueld_readconfig("ueld_muti_init_other_init_telinit");
 		if (other_init_telinit)
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
 	if ((c != '\0') && strchr(press_keys, c) && !timeout) {
 		char* other_init = ueld_readconfig("ueld_muti_init_other_init");
 		if (other_init)
-			execl(other_init, argv[0], 0);
+			execl(other_init, argv[0], NULL);
 
 		ueld_echo("Can not load other init, load ueld!!!");
 	}

@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <signal.h>
 
 #ifdef LINUX
 #include <sys/prctl.h>
@@ -43,7 +44,7 @@ static void sig_user1(int signo)
 	ueld_print("Trying to reload init '%s'\n", path);
 
 	if (path)
-		execl(path, "-ueld", 0);
+		execl(path, "-ueld", NULL);
 
 	ueld_print("Reload init '%s' failed.\n", path ? path : "Unknown");
 }
