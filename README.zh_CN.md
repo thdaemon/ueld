@@ -6,7 +6,7 @@
 
 Ueld (用户态环境加载器守护进程) 是一个轻量级的 Unix/Linux 环境下的 init 程序，可用于替换 SysVInit 和 Systemd
 
-#### 编译与安装
+### 编译与安装
 
 ```
 $ cd path-to-ueld-src
@@ -15,9 +15,13 @@ $ make
 $ sudo make install
 ```
 
+On FreeBSD, you need use `gmake` instead of `make`. Compiling ueld need GNU Make.
+
 安装需要 Root 用户，因此本例中使用了 `sudo(8)`，如果你的系统中没有 `sudo(8)`，请使用其他方法切换到 Root。
 
 可使用 `PREFIX` 变量设置根文件系统，可使用 `INSTALLDIR` 变量设置安装目录。
+
+> Note: When you use both `PREFIX` and `INSTALLDIR`, the install path is `${PREFIX}/${INSTALLDIR}`, in other word, `INSTALLDIR` should not include the path prefix.
 
 **编译时配置**
 
@@ -47,32 +51,32 @@ Some systems do not use initramfs. That means ueld should mount some filesystems
 $ sudo make install_no_initramfs
 ```
 
-#### 配置和使用 Ueld
+### 配置和使用 Ueld
 
 在安装后建议立刻配置 Ueld，参考 [此 Wiki](doc/zh_CN/userguide.md)
 
 **Ueld 使用手册也包含在这篇 Wiki 中；**卸载说明也包含在此 Wiki 中。
 
-如果你第一次安装 Ueld，那么 Ueld 配置文件被设置为在 tty1-5 上创建 `getty(8)` 等待登录，这可能不适合你的情况，因此，不要忘记配置它。值得注意的是，安装 Ueld 时，如果相应目录已经存在配置文件，也不会覆盖之前的配置文件，即使新版本的缺省配置可能发生变化。
+If you first install Ueld on Linux, then the Ueld configuration file is set to create `getty(8)` on tty1-5 to wait for login, which may not be suitable for your situation, so do not forget to configure it. Noteworthy, when you install Ueld, if the configuration file in the corresponding directory is already exists, it will not overwrite the previous configuration file, even if the new version of the default configuration may be changed.
 
-#### Ueld 的优点
+But on FreeBSD, the Ueld configuration file will run /etc/rc and then ctreate `getty`, so you may have no request to modify them.
 
-- Ueld 非常轻量级和简洁，“小既是美”。庞大的东西总是让人很不舒服，因此我尽力避免 Ueld 成为庞大的软件。
+### Install Examples
 
-- 我尽力使 Ueld 仅提供 init 该提供的一系列原语操作，尽力做到 “提供机制，而不是策略”。通过用户可编辑的脚本，将系统启动，关机时的具体策略交由不同的软件去完成，所有行为的最终逻辑可由用户根据他们自己的需要制定，使其具有很强的灵活性。
+Now, we have some examples to show how to install ueld on your system!
 
-- Ueld 特别适用于像树莓派这样的设备，或者对开机速度特别在意的人。实际上，我就是在一种“类树莓派”板卡----NanoPi 2Fire 上开发 ueld 的。在该设备上使用 Debian 8 系统，用 ueld 替换 systemd 后，开机速度提升了 10-20 倍！！（这太令我感到惊讶了）
+[Install on Ubuntu 16.04.1](doc/install_on_ubuntu.md)
 
-- 最后一个，也是一个 Ueld 独有的、在大多数情况下没什么用、但有时可能挺实用的小功能，我把它叫做”Muti Init“，他允许你将 Ueld 配置为开机时选择加载哪一个 init 程序，ueld，sysvinit，还是 systemd。（PC 的用户或许会嘲笑我可以在 grub 中添加几个条目，他们使用不同的 init=xxx 内核启动参数，但是必须提到的是，像 NanoPi 这种设备，通过重刷 u-boot 来修改一次修改启动参数是一件苦差事）
+[Install on FreeBSD](doc/install_on_freebsd.md)
 
-#### Ueld 目前的问题
+### TODO
 
-- Ueld 目前仅支持 Linux 系统，不过，绝大部分移植层代码都放置在 os/ 子目录中，其他代码也考虑到了移植问题（例如 BSD 上需要用 ioctl(2) 设置控制终端），因此可以移植到其他 Unix 系统，但 init 程序本身的特性决定了不同平台的代码必须存在大量差异，移植需要一定的工作。
+- Ueld currently only supports Linux systems and FreeBSD. It is interesting to port it to other Unix systems. (Platform related code is placed in the os/ subdirectory. The init program itself determines that the characteristics of the different platforms have to make a lot of differences in the code.)
 
-- Ueld 目前不支持命令行和配置文件中转义字符和引号
-
-- Ueld 目前使用了多个信号处理各种 ueldctl 命令，更好的方案是像 telinit 那样
+- Ueld 目前不支持 ueld.conf 和 respawn.list 中的转义字符和引号
 
 - Ueld 目前不支持带参数重启
 
-- Ueld 目前不能优雅得与现有桌面环境进行整合
+- Ueld 目前不能优雅得与现有桌面环境进行整合. That need use dbus to get messages. But do not add the support into ueld, let strategy and mechanism separate.
+
+- See the 'TODO' and 'FIXME' marks in code.
