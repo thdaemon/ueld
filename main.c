@@ -10,16 +10,19 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <signal.h>
 
 #ifdef LINUX
 #include <sys/prctl.h>
-#endif // LINUX
+#endif /* LINUX */
 
 #include "reboot.h"
 #include "os/pw.h"
 #include "os/ctrlaltdel.h"
 #include "tools.h"
 #include "respawn.h"
+
+#include "config.h"
 
 static void sig_term(int signo)
 {
@@ -41,7 +44,7 @@ static void sig_user1(int signo)
 	ueld_print("Trying to reload init '%s'\n", path);
 
 	if (path)
-		execl(path, "-ueld", 0);
+		execl(path, "-ueld", NULL);
 
 	ueld_print("Reload init '%s' failed.\n", path ? path : "Unknown");
 }
@@ -74,7 +77,7 @@ int ueld_main(int argc, char* argv[])
 
 #ifdef LINUX
 	prctl(PR_SET_NAME, "ueld", 0, 0);
-#endif // LINUX
+#endif /* LINUX */
 
 	ueld_unblock_signal(SIGUSR1);
 
@@ -123,12 +126,14 @@ int ueld_main(int argc, char* argv[])
 	} else if (fd > 0) {
 		close(fd);
 	}
-#endif // LINUX
+#endif /* LINUX */
 
 	ueld_closeconfig();
 
 	while (1) {
-		if((pid = wait(&status)) > 0) {
+		if ((pid = wait(&status)) > 0) {
+			if (!(WIFEXITED(status)) && !(WIFSIGNALED(status)))
+				continue;
 #ifndef CONFIG_RESPAWN_NO_IGN_FAIL_PROC
 			if ((WIFEXITED(status)) && (WEXITSTATUS(status) == EXIT_FAILURE)) {
 				clearpid(pid);

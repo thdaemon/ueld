@@ -1,14 +1,23 @@
+#define _XOPEN_SOURCE 700
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <errno.h>
 
 #include "fileio.h"
 
-#ifdef CONFIG_MANU_GET_MNTINFO
-/* the function name 'nsa' means 'None Seekable' */
+/*
+ * The function name 'nsa' means 'None Seekable'.
+ * But it can be used for seekable file too. :-)
+ * Why did I use the name? Because the function read the
+ * whole file to a buffer which alloced at runtime
+ * so that it was usually used for noneseekable files.
+ */
 ssize_t readnsa(int fd, char** ptr)
 {
 	ssize_t nread, n;
@@ -37,4 +46,3 @@ ssize_t readnsa(int fd, char** ptr)
 	}
 	return nread;
 }
-#endif /* CONFIG_MANU_GET_MNTINFO */
