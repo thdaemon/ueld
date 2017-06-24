@@ -49,8 +49,8 @@ to
 
 ```
 ueld_enable_muti_init=1
-ueld_muti_init_other_init=/lib/system/systemd
-ueld_muti_init_other_init_telinit=/lib/system/systemd
+ueld_muti_init_other_init=/lib/systemd/systemd
+ueld_muti_init_other_init_telinit=/lib/systemd/systemd
 ```
 
 ### Fixup udevd name

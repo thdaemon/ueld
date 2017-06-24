@@ -1,8 +1,10 @@
-# Example: Install Ueld on Ubuntu 16.04.1
+# Example: Install Ueld on FreeBSD
 
 Hardware is a x86 PC
 
-> Install need some software, but ueld do not need them, ueld only require glibc.
+FreeBSD is 11.0, other versions should be ok.
+
+> Install need some software, but ueld do not need them, ueld only require libc.
 >
 > git - fetch ueld source   
 > GNU Make - compile ueld   
