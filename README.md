@@ -49,6 +49,14 @@ Some systems do not use initramfs. That means ueld should mount some filesystems
 $ sudo make install_no_initramfs
 ```
 
+**Install sysvinit-compat version for linux system (Beta)**
+
+If you want to use sysvinit style services, you can
+
+```
+$ sudo make install_sysv_compat
+```
+
 ### Configure and use Ueld
 
 After the installation, I suggest you configure Ueld immediately, refer to [this Wiki](doc/userguide.md)
