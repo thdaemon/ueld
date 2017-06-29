@@ -63,6 +63,16 @@ install_no_initramfs:
 
 	@$(MAKE) install_generic_etc_file
 
+install_sysv_compat:
+	@$(MAKE) install_ueld_executable
+
+	mkdir -p $(ETCDIR)
+	cp -n etcfiles/sysv_compat/* $(ETCDIR)/
+	touch $(ETCDIR)/*
+	chmod 755 $(ETCDIR)/*
+
+	@$(MAKE) install_generic_etc_file
+
 install:
 	@$(MAKE) install_ueld_executable
 	@$(MAKE) install_generic_etc_file
