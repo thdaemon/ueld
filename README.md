@@ -57,6 +57,8 @@ If you want to use sysvinit style services, you can
 $ sudo make install_sysv_compat
 ```
 
+For more infomation, please see [this Wiki](doc/sysv_compat.md)
+
 ### Configure and use Ueld
 
 After the installation, I suggest you configure Ueld immediately, refer to [this Wiki](doc/userguide.md)

@@ -131,6 +131,21 @@ dhclient XXX &
 echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 ```
 
+### x86 PC's Power Button
+
+'acpid' package should be installed.
+
+change /etc/acpi/powerbtn.sh, let it fit ueld.
+
+```
+#!/bin/sh
+
+echo 'Power button pressed, doing poweroff...' > /dev/console
+/sbin/ueldctl -p
+```
+
+NOTE: the script name may changed, you can see which file used by /etc/acpi/events/...
+
 ### The X Window
 
 on Ubuntu 16.04, startx worked badly (a user who isn't root use startx will catch a error which may is threw by OpenGL), so I write a simple display manager to start X.
@@ -138,14 +153,17 @@ on Ubuntu 16.04, startx worked badly (a user who isn't root use startx will catc
 ```
 $ git clone https://github.com/thdaemon/mydm --depth=1
 $ cd mydm
+$ ./mkconfig.sh --enable-xsec
 $ make
 $ sudo make install
 ```
 
+NOTE: Now mydm has debian packages and binary tar, you can install [them](https://github.com/thdaemon/mydm/releases) instead of compiling.
+
 Add these to /etc/ueld/sysloaded.sh before `exit 0`
 
 ```
-/opt/mydm -u user_name -c unity &
+/opt/mydm -u user_name -n -c unity &
 ```
 
 user_name is your user's name, unity is your de, other DEs and WMs like:
@@ -158,7 +176,7 @@ Gnome3|gnome-session
 KDE|startkde4, etc.
 Unity|unity
 Openbox|openbox
-i3|i3wm
+i3|i3
 
 For more usages, run `/opt/mydm -h`, for example, if you want to run fcitx and some programs after start x client, you can
 
@@ -174,19 +192,22 @@ exit 0
 EOF
 # chmod +x /opt/myde_autostart.sh
 ```
+
 Afert doing these, we can run mydm like this
 
 ```
-# /opt/mydm -u user_name -c XXXX -r /opt/myde_autostart.sh
+/opt/mydm -u user_name -n -c XXXX -r /opt/myde_autostart.sh
 ```
 
 And you can also use it to run your own DE, for example, you can run a pancel and run a wm (metacity is a wm)
 
 ```
-# /opt/mydm -u user_name -c pancel_name_or_start_script -r metacity
+/opt/mydm -u user_name -n -c pancel_name_or_start_script -r metacity
 ```
 
-> Warning: mydm don't support `xauth` now, so it only fit personal user like Desktop PC. If it is required that many users login your system in a same time, do not use it!
+**XSECURITY**
+
+If it is required that many users login your system in a same time, you need add `-A` option to enable MIT-MAGIC-COOKIE-1 XSecurity.
 
 **NOTE**
 
