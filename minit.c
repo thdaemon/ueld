@@ -26,11 +26,11 @@ int main(int argc, char* argv[]) {
 		return ueld_main(argc, argv);
 	}
 	
-	if (ueld_readconfiglong("ueld_enable_muti_init", -1) != 1) {
+	if (ueld_readconfiglong("ueld_enable_multi_init", -1) != 1) {
 		return ueld_main(argc, argv);
 	}
 	
-	/* then, use muti init... */
+	/* then, use multi init... */
 		
 	if (getpid() != 1) {
 		char* args[argc + 1];
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 		}
 		args[argc] = NULL;
 
-		char* other_init_telinit = ueld_readconfig("ueld_muti_init_other_init_telinit");
+		char* other_init_telinit = ueld_readconfig("ueld_multi_init_other_init_telinit");
 		if (other_init_telinit)
 			execvp(other_init_telinit, args);
 
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 	ueld_signal(SIGALRM, sig_alarm, 0);
 
 	printf("%s\n", "=============================\n"
-	"[Ueld Muti Init]\n"
+	"[Ueld Multi Init]\n"
 	"Press the keys(default s) to load the init which you configed, "
 	"the others or timeout to load ueld.");
 
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
 		ueld_echo("Warning: could not get the terminal characteristics.");
 	}
 
-	alarm(ueld_readconfiglong("ueld_muti_init_choose_time_out", 3));
+	alarm(ueld_readconfiglong("ueld_multi_init_choose_time_out", 3));
 	char c = 0;
 
 	read(STDIN_FILENO, &c, 1);
@@ -80,11 +80,11 @@ int main(int argc, char* argv[]) {
 			ueld_echo("Warning: could not restore the terminal characteristics.");
 	}
 
-	char* press_keys = ueld_readconfig("ueld_muti_init_press_keys");
+	char* press_keys = ueld_readconfig("ueld_multi_init_press_keys");
 	if (!press_keys) press_keys = "sS";
 
 	if ((c != '\0') && strchr(press_keys, c) && !timeout) {
-		char* other_init = ueld_readconfig("ueld_muti_init_other_init");
+		char* other_init = ueld_readconfig("ueld_multi_init_other_init");
 		if (other_init)
 			execl(other_init, argv[0], NULL);
 

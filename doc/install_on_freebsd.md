@@ -15,13 +15,13 @@ FreeBSD is 11.0, other versions should be ok.
 ```
 $ git clone https://github.com/thdaemon/ueld.git --depth=1
 $ cd ueld
-$ ./mkconfig.sh --no-build-in-muti-init
+$ ./mkconfig.sh --no-build-in-minit
 $ gmake
 $ su
 Password:
 # gmake install
 ```
-Muti-init feature can not work on FreeBSD, but you can build-in it, it won't cause ueld crash, but it will improve the size of the binary.
+Multi-init feature can not work on FreeBSD, but you can build-in it, it won't cause ueld crash, but it will improve the size of the binary.
 
 > On FreeBSD, compiler may give some warning now.  
 > Because ueld use some gnu ext like strchrnul

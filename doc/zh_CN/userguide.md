@@ -55,11 +55,11 @@ Name|Default Value|Description
 ueld_execfile|/sbin/init|Ueld 可执行文件路径，当使用 `ueldctl -l` 时 ueld 进程 exec 该程序，不允许相对路径
 ueld_must_remount_before_poweroff|0|要求 Ueld 在切断机器电源之前必须卸载（或重载为只读）所有文件系统，否则停止关机过程并弹出 Shell
 system_shell|/bin/sh|设置系统 Shell 程序，不允许相对路径
-ueld_enable_muti_init|0|是否启用 Muti Init 功能
-ueld_muti_init_other_init|空白|ueld_enable_muti_init 为 1 时（启用 Muti Init 功能时）有效，另一个 init 程序的绝对路径，例如 /bin/systemd
-ueld_muti_init_other_init_telinit|空白|ueld_enable_muti_init 为 1 时（启用 Muti Init 功能时）有效，另一个 init 软件包的 telinit 程序的绝对路径，例如 /bin/systemd
-ueld_muti_init_choose_time_out|3|ueld_enable_muti_init 为 1 时（启用 Muti Init 功能时）有效，开机时选择 init 程序时等待的最大秒数，超时则选择加载 ueld
-ueld_muti_init_press_keys|Ss|ueld_enable_muti_init 为 1 时（启用 Muti Init 功能时）有效，在选择时，让 ueld 加载另一个 init 程序的热键，允许同时指定多个热键，区分大小写
+ueld_enable_multi_init|0|是否启用 Multi Init 功能
+ueld_multi_init_other_init|空白|ueld_enable_multi_init 为 1 时（启用 Multi Init 功能时）有效，另一个 init 程序的绝对路径，例如 /bin/systemd
+ueld_multi_init_other_init_telinit|空白|ueld_enable_multi_init 为 1 时（启用 Multi Init 功能时）有效，另一个 init 软件包的 telinit 程序的绝对路径，例如 /bin/systemd
+ueld_multi_init_choose_time_out|3|ueld_enable_multi_init 为 1 时（启用 Multi Init 功能时）有效，开机时选择 init 程序时等待的最大秒数，超时则选择加载 ueld
+ueld_multi_init_press_keys|Ss|ueld_enable_multi_init 为 1 时（启用 Multi Init 功能时）有效，在选择时，让 ueld 加载另一个 init 程序的热键，允许同时指定多个热键，区分大小写
 ueld_path_var|blank|If it is not blank, ueld will set it to `$PATH` when `$PATH` is blank. If you want to force override `$PATH`, use ueld_override_path_var
 ueld_override_path_var|0|When it is 1, ueld will force override `$PATH` to ueld_path_var
 ueld_console_vt|CONFIG_CONSOLE_VT or 1|see [genconfig.md](../genconfig.md)
