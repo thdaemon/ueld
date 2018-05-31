@@ -25,7 +25,7 @@ You can use the `PREFIX` variable to set the root file system. You can use the` 
 
 Before you compile ueld, you need do 'compiletime config' by `./mkconfig.sh`, it will generate a config.h header which includes config macros. Run mkconfig.sh without args will make a header which includes default config.
 
-For example, if you need not Muti-Init feature, you can
+For example, if you need not Multi-Init feature, you can
 
 ```
 $ ./mkconfig.sh --no-build-in-minit

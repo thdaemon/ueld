@@ -24,9 +24,9 @@ $ make && sudo make install
 
 The default config is not fully fit Ubuntu, we need fix it.
 
-### Muti-Init ?
+### Multi-Init ?
 
-Do you need muti-init feature? If you worry that system can not start after replace systemd by ueld, you can enable muti init. It will ask you which init will be loaded when starting system.
+Do you need multi-init feature? If you worry that system can not start after replace systemd by ueld, you can enable multi init. It will ask you which init will be loaded when starting system.
 
 If you do not need, ignore this!
 
@@ -40,17 +40,17 @@ If you do not need, ignore this!
 Change 
 
 ```
-ueld_enable_muti_init=0
-ueld_muti_init_other_init=
-ueld_muti_init_other_init_telinit=
+ueld_enable_multi_init=0
+ueld_multi_init_other_init=
+ueld_multi_init_other_init_telinit=
 ```
 
 to
 
 ```
-ueld_enable_muti_init=1
-ueld_muti_init_other_init=/lib/systemd/systemd
-ueld_muti_init_other_init_telinit=/lib/systemd/systemd
+ueld_enable_multi_init=1
+ueld_multi_init_other_init=/lib/systemd/systemd
+ueld_multi_init_other_init_telinit=/lib/systemd/systemd
 ```
 
 ### Fixup udevd name
