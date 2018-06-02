@@ -1,14 +1,14 @@
 UELD_OS := unkown
-include version
+UELD_VERSION := $(shell cat version)
 
 ifeq "$(PLATFORM)" ""
- PLATFORM = $(shell ./systype.sh)
+ PLATFORM := $(shell ./systype.sh)
 endif
 include Make.defines.$(PLATFORM)
 
 
 PREFIX :=
-INSTALLDIR := /usr/lib/ueld/ueld-$(UELD_VERSION)
+INSTALLDIR := /lib/ueld/ueld-$(UELD_VERSION)
 ETCDIR := $(PREFIX)/etc/ueld
 
 OBJS := main.o minit.o fileio.o reboot.o tools.o respawn.o os/$(UELD_OS)/pw.o os/$(UELD_OS)/chvt.o os/$(UELD_OS)/ctrlaltdel.o os/$(UELD_OS)/proc.o os/$(UELD_OS)/mnt.o
