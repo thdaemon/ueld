@@ -6,6 +6,14 @@ Ueld (Usermode Environment Loader Daemon) is a lightweight init program under Un
 
 ### Compile and install
 
+Unstable branch may contain useful fixes or exciting changes, you can use git Version Control switch to unstable branch. But this will be quite dangerous, because the unstable branch code has not been fully tested.
+
+```
+$ git checkout unstable
+```
+
+To compile and install
+
 ```
 $ cd path-to-ueld-src
 $ ./mkconfig.sh
@@ -49,7 +57,7 @@ Some systems do not use initramfs. That means ueld should mount some filesystems
 $ sudo make install_no_initramfs
 ```
 
-**Install sysvinit-compat version for linux system (Beta)**
+**Install sysvinit-compat version for linux system (Obsolete)**
 
 If you want to use sysvinit style services, you can
 
@@ -81,9 +89,9 @@ Now, we have some examples to show how to install ueld on your system!
 
 - Ueld currently only supports Linux systems and FreeBSD. It is interesting to port it to other Unix systems. (Platform related code is placed in the os/ subdirectory. The init program itself determines that the characteristics of the different platforms have to make a lot of differences in the code.)
 
-- Ueld currently does not support escaped characters and quotation marks in ueld.conf and respawn.list.
+- ~~Ueld currently does not support escaped characters and quotation marks in ueld.conf and respawn.list.~~ (Working is in unstable branch.)
 
-- Ueld currently dose not support reboot with parameter.
+- ~~Ueld currently dose not support reboot with parameter.~~ (deleted)
 
 - Ueld could not integrate with the existing Desktop environment gracefully now. That need use dbus to get messages. But do not add the support into ueld, let strategy and mechanism separate.
 
