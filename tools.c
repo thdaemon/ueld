@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <wordexp.h>
 
 #include "tools.h"
 #include "names.h"
@@ -174,26 +175,18 @@ pid_t ueld_run(char* file, int flag, int vt, int* wait_status)
 		}
 
 		if (flag & URF_CMDLINE) {
-			char* args[MAX_ARGS + 1];
-			char* ptr;
-			int argssz = 0;
+			wordexp_t p;
+			int ret;
 
-			ptr = malloc(strlen(file) + 1);
-			strcpy(ptr, file);
-			while (*ptr != 0) {
-				if (argssz > (MAX_ARGS - 1))
-					break;
-				args[argssz++] = ptr;
-				ptr = strchr(ptr, ' ');
-
-				if (!ptr || *ptr == 0) break;
-				*ptr = 0;
-				ptr++;
+			p.we_offs = 0;
+			if ((ret = wordexp(file, &p, WRDE_DOOFFS)) != 0) {
+				ueld_print("Could not run '%s': wordexp error %d\n", file, ret);
+				_exit(EXIT_FAILURE);
 			}
 
-			args[argssz++] = NULL;
-			execvp(args[0], args);
-			free(ptr);
+			execvp(p.we_wordv[0], p.we_wordv);
+
+			wordfree(&p);
 		} else {
 			execl(file, file, NULL);
 		}

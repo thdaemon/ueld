@@ -1,0 +1,11 @@
+What's new in ueld
+==================
+
+0.5.1-unstable 2018-6-20
+========================
+
+before the version ueld_run() URF_CMDLINE parse command line it self by 
+only split space. It can not handle the complex situation such as quotes.
+
+Now we have used POSIX wordexp() to parse command line in ueld_run() when
+the flag URF_CMDLINE is set. So the semantics are more complete.
