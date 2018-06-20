@@ -87,16 +87,16 @@ Now, we have some examples to show how to install ueld on your system!
 
 ### TODO
 
-[ ] Port ueld to other Unix systems. (Platform related code is placed in the os/ subdirectory. The init program itself determines that the characteristics of the different platforms have to make a lot of differences in the code.)
+- [ ] Port ueld to other Unix systems. (Platform related code is placed in the os/ subdirectory. The init program itself determines that the characteristics of the different platforms have to make a lot of differences in the code.)
 
-[x] Ueld currently does not support escaped characters and quotation marks in ueld.conf and respawn.list.
+- [x] Ueld currently does not support escaped characters and quotation marks in ueld.conf and respawn.list.
 
-[ ] Desktop environment support. That need use dbus service to get messages (such as poweroff) and run ueldctl. Do not add the support into ueld daemon process.
+- [ ] Desktop environment support. That need use dbus service to get messages (such as poweroff) and run ueldctl. Do not add the support into ueld daemon process.
 
-[ ] Ueld subreaper for user (like `upstart --user` or `systemd --user`), for Linux 3.4+.
+- [ ] Ueld subreaper for user (like `upstart --user` or `systemd --user`), for Linux 3.4+.
 
-[ ] Ueld system service system.
+- [ ] Ueld system service system.
 
-[ ] Clean dirty codes.
+- [ ] Clean dirty codes.
 
-- See the 'TODO' and 'FIXME' marks in code.
+- [ ] See the 'TODO' and 'FIXME' marks in code.
