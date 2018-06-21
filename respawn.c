@@ -15,11 +15,20 @@
 #define RESPAWN_FILE "/etc/ueld/respawn.list"
 #define HASHTABLE_FIRST_NODE_SIZE 32
 
+#ifdef __GNUC__
+#define likely(x)	__builtin_expect((x),1)
+#define unlikely(x)	__builtin_expect((x),0)
+#else
+#define likely(x)	(x)
+#define unlikely(x)	(x)
+#endif /* __GNUC__ */
+
 struct respawn_node {
 	int nref;
 	int vt;
 	pid_t pid;
 	char *cmd;
+	struct respawn_node *prev;
 	struct respawn_node *next;
 };
 
@@ -32,14 +41,6 @@ static char *respawn;
 #define hashpid(pid)	((pid) % HASHTABLE_FIRST_NODE_SIZE)
 #define nodefree(node)	(free(node))
 #define noderef(node)	(((node)->nref)++)
-
-#ifdef __GNUC__
-#define likely(x)	__builtin_expect((x),1)
-#define unlikely(x)	__builtin_expect((x),0)
-#else
-#define likely(x)	(x)
-#define unlikely(x)	(x)
-#endif /* __GNUC__ */
 
 static struct respawn_node *nodenew()
 {
@@ -66,6 +67,7 @@ static void insert(pid_t key, struct respawn_node *node)
 	int index = hashpid(key);
 
 	noderef(node);
+	node->prev = NULL;
 	node->next = NULL;
 
 	if (first_nodes[index] == NULL) {
@@ -76,6 +78,7 @@ static void insert(pid_t key, struct respawn_node *node)
 			prenode = prenode->next;
 		}
 		prenode->next = node;
+		node->prev = prenode;
 	}
 }
 
@@ -95,29 +98,42 @@ static struct respawn_node *get(pid_t key)
 	return NULL;
 }
 
+#define delete_node_without_index(node)	delete_node((node), -1)
+
+static void delete_node(struct respawn_node *node, int index)
+{
+	struct respawn_node *prenode = node->prev;
+
+	if (prenode) {
+		prenode->next = node->next;
+	} else {
+		if (index == -1)
+			index = hashpid(node->pid);
+		first_nodes[index] = node->next;
+	}
+
+	if (node->next) {
+		node->next->prev = prenode;
+	}
+
+	nodeunref(node);
+}
+
 static void delete(pid_t key)
 {
 	int index = hashpid(key);
 
-	struct respawn_node *prenode = NULL;
 	struct respawn_node *node = first_nodes[index];
 	while (node != NULL) {
 		if (node->pid == key) {
-			if (prenode) {
-				prenode->next = node->next;
-			} else {
-				first_nodes[index] = node->next;
-			}
-
-			nodeunref(node);
+			delete_node(node, index);
 		}
 
-		prenode = node;
 		node = node->next;
 	}
 }
 
-static pid_t runapp(struct respawn_node* app)
+static pid_t runapp(struct respawn_node *app)
 {
 	pid_t pid;
 
@@ -127,8 +143,8 @@ static pid_t runapp(struct respawn_node* app)
 		pid = ueld_run(app->cmd, URF_CMDLINE, 0, NULL);
 	}
 
-	if (pid < 0) pid = 0;
-	app->pid = pid;
+	if (pid < 0)
+		pid = 0;
 
 	return pid;
 }
@@ -171,12 +187,13 @@ void respawn_init()
 		struct respawn_node *node;
 		if ((node = nodenew()) != NULL) {
 			node->vt = atoi(vt);
-			node->pid = 0;
 			node->cmd = cmd;
 
 			pid_t pid = runapp(node);
 
-			if (unlikely(pid <= 0)) {
+			node->pid = pid;
+
+			if (unlikely(pid == 0)) {
 				ueld_print("Run respwan process '%s' first time failed\n", cmd);
 			} else {
 				appssz++;
@@ -203,12 +220,12 @@ void respawnpid(pid_t pid)
 	if ((node = get(pid)) != NULL) {
 		pid_t newpid = runapp(node);
 
-		if (unlikely(newpid <= 0)) {
+		if (unlikely(newpid == 0)) {
 			ueld_print("Respwan process '%s' failed, remove it from list...\n", node->cmd);
-			delete(node->pid);
+			delete_node_without_index(node);
 		} else {
 			noderef(node);
-			delete(node->pid);
+			delete_node_without_index(node);
 			node->pid = newpid;
 			insert(newpid, node);
 			nodeunref(node);
@@ -234,5 +251,6 @@ void clearpid(pid_t pid)
 				first_nodes[i] = NULL;
 			}
 		}
+		munmap(respawn, length);
 	}
 }
