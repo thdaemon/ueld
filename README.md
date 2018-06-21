@@ -89,9 +89,11 @@ Now, we have some examples to show how to install ueld on your system!
 
 - [ ] Port ueld to other Unix systems. (Platform related code is placed in the os/ subdirectory. The init program itself determines that the characteristics of the different platforms have to make a lot of differences in the code.)
 
-- [x] Ueld currently does not support escaped characters and quotation marks in ueld.conf and respawn.list.
+- [x] Support escaped characters and quotation marks in ueld.conf and respawn.list.
 
 - [ ] Desktop environment support. That need use dbus service to get messages (such as poweroff) and run ueldctl. Do not add the support into ueld daemon process.
+
+- [x] Hash table for respwan process.
 
 - [ ] Ueld subreaper for user (like `upstart --user` or `systemd --user`), for Linux 3.4+.
 
