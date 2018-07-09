@@ -18,9 +18,6 @@ static int logfd;
 
 void ueld_log_init()
 {
-	/* FIXME: ueld build-in log make system hang, do not enable it now */
-	return;
-
 	char *target = ueld_readconfig("ueld_log_target");
 	if (!target || *target == 0) {
 		ueld_echo("ueld_log_target empty. Ignore all logs.");
@@ -34,7 +31,7 @@ void ueld_log_init()
 		return;
 	}
 
-	target = '\0';
+	*target = '\0';
 	target++;
 
 	if (target[0] == '\0') {

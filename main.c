@@ -82,8 +82,6 @@ int ueld_main(int argc, char* argv[])
 
 	ueld_unblock_signal(SIGUSR1);
 
-	ueld_log_init();
-
 	setevar();
 
 	ueld_signal(SIGTERM, &sig_term, 1);
@@ -92,6 +90,7 @@ int ueld_main(int argc, char* argv[])
 
 	if (argc > 0 && (strcmp(argv[0], "-ueld") != 0)) {
 		ueld_run("/etc/ueld/sysinit.sh", URF_WAIT, 0, NULL);
+		ueld_log_init();
 		respawn_init();
 		ueld_run("/etc/ueld/sysloaded.sh", URF_NOOUTPUT, 0, NULL);
 	}
