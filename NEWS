@@ -1,6 +1,11 @@
 What's new in ueld
 ==================
 
+0.6.1-unstable 2018-6-21
+========================
+
+Now we use hash table to improve respwan performance.
+
 0.5.1-unstable 2018-6-20
 ========================
 
