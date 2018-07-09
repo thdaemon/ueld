@@ -26,14 +26,15 @@ void ueld_log_init()
 
 	char *proto = target;
 	target = strchr(target, ':');
-	if (!target || *target == 0) {
+	if (!target || *target == '\0') {
 		ueld_echo("ueld_log_target proto unknown. Ignore all logs.");
 		return;
 	}
 
+	target = '\0';
 	target++;
 
-	if (target[0] == 0) {
+	if (target[0] == '\0') {
 		ueld_echo("ueld_log_target target name empty. Ignore all logs.");
 		return;
 	}
@@ -44,7 +45,7 @@ void ueld_log_init()
 	} else if (strcmp(proto, "file") == 0) {
 		proto_type = UELD_LOG_PROTO_FILE;
 
-		logfd = open(target, O_WRONLY|O_APPEND|O_NOCTTY);
+		logfd = open(target, O_CREAT|O_WRONLY|O_APPEND|O_NOCTTY);
 		if (logfd > 0) {
 			block = 0;
 		} else {
@@ -74,7 +75,7 @@ void ueld_log_close()
 /* FIXME: multiple proto write functions */
 void ueld_write_log(char *msg)
 {
-	if (block);
+	if (block)
 		return;
 
 	/* TODO: need current time */
