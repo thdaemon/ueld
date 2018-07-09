@@ -13,21 +13,127 @@
 #include "tools.h"
 
 #define RESPAWN_FILE "/etc/ueld/respawn.list"
-#define MAX_APP 32
+#define HASHTABLE_FIRST_NODE_SIZE 32
 
-struct respawn_app {
+#ifdef __GNUC__
+#define likely(x)	__builtin_expect((x),1)
+#define unlikely(x)	__builtin_expect((x),0)
+#else
+#define likely(x)	(x)
+#define unlikely(x)	(x)
+#endif /* __GNUC__ */
+
+struct respawn_node {
+	int nref;
 	int vt;
 	pid_t pid;
-	char* cmd;
+	char *cmd;
+	struct respawn_node *prev;
+	struct respawn_node *next;
 };
 
-static struct respawn_app apps[MAX_APP];
-static unsigned int appssz = 0;
+static struct respawn_node *first_nodes[HASHTABLE_FIRST_NODE_SIZE];
+static unsigned int disable = 0;
 
 static size_t length;
-static char* respawn;
+static char *respawn;
 
-static void runapp(struct respawn_app* app)
+#define hashpid(pid)	((pid) % HASHTABLE_FIRST_NODE_SIZE)
+#define nodefree(node)	(free(node))
+#define noderef(node)	(((node)->nref)++)
+
+static struct respawn_node *nodenew()
+{
+	static struct respawn_node *node;
+
+	if ((node = malloc(sizeof(struct respawn_node))) == NULL) {
+		return NULL;
+	}
+
+	node->nref = 1;
+	return node;
+}
+
+static void nodeunref(struct respawn_node *node)
+{
+	node->nref = node->nref - 1;
+	if (node->nref <= 0) {
+		nodefree(node);
+	}
+}
+
+static void insert(pid_t key, struct respawn_node *node)
+{
+	int index = hashpid(key);
+
+	noderef(node);
+	node->prev = NULL;
+	node->next = NULL;
+
+	if (first_nodes[index] == NULL) {
+		first_nodes[index] = node;
+	} else {
+		struct respawn_node *prenode = first_nodes[index];
+		while (prenode->next != NULL) {
+			prenode = prenode->next;
+		}
+		prenode->next = node;
+		node->prev = prenode;
+	}
+}
+
+static struct respawn_node *get(pid_t key)
+{
+	int index = hashpid(key);
+
+	struct respawn_node *node = first_nodes[index];
+	while (node != NULL) {
+		if (node->pid == key) {
+			return node;
+		}
+
+		node = node->next;
+	}
+
+	return NULL;
+}
+
+#define delete_node_without_index(node)	delete_node((node), -1)
+
+static void delete_node(struct respawn_node *node, int index)
+{
+	struct respawn_node *prenode = node->prev;
+
+	if (prenode) {
+		prenode->next = node->next;
+	} else {
+		if (index == -1)
+			index = hashpid(node->pid);
+		first_nodes[index] = node->next;
+	}
+
+	if (node->next) {
+		node->next->prev = prenode;
+	}
+
+	nodeunref(node);
+}
+
+static void delete(pid_t key)
+{
+	int index = hashpid(key);
+
+	struct respawn_node *node = first_nodes[index];
+	while (node != NULL) {
+		if (node->pid == key) {
+			delete_node(node, index);
+		}
+
+		node = node->next;
+	}
+}
+
+static pid_t runapp(struct respawn_node *app)
 {
 	pid_t pid;
 
@@ -37,13 +143,16 @@ static void runapp(struct respawn_app* app)
 		pid = ueld_run(app->cmd, URF_CMDLINE, 0, NULL);
 	}
 
-	if (pid < 0) pid = 0;
-	app->pid = pid;
+	if (pid < 0)
+		pid = 0;
+
+	return pid;
 }
 
 void respawn_init()
 {
 	int fd;
+	int appssz = 0;
 	char *p, *vt, *cmd;
 
 	if ((fd = open(RESPAWN_FILE, O_RDONLY)) < 0)
@@ -75,11 +184,26 @@ void respawn_init()
 		*p = 0;
 		p++;
 
-		apps[appssz].vt = atoi(vt);
-		apps[appssz].pid = 0;
-		apps[appssz].cmd = cmd;
+		struct respawn_node *node;
+		if ((node = nodenew()) != NULL) {
+			node->vt = atoi(vt);
+			node->cmd = cmd;
 
-		runapp(&apps[appssz++]);
+			pid_t pid = runapp(node);
+
+			node->pid = pid;
+
+			if (unlikely(pid == 0)) {
+				ueld_print("Run respwan process '%s' first time failed\n", cmd);
+			} else {
+				appssz++;
+				insert(pid, node);
+			}
+
+			nodeunref(node);
+		} else {
+			ueld_print("Create respwan node for '%s' failed\n", cmd);
+		}
 	}
 
 	if (!appssz)
@@ -88,25 +212,45 @@ void respawn_init()
 
 void respawnpid(pid_t pid)
 {
-	for (int i = 0; i < appssz; i++) {
-		if (apps[i].pid == pid) {
-			runapp(&apps[i]);
-			break;
+	if (disable) {
+		return;
+	}
+
+	struct respawn_node *node;
+	if ((node = get(pid)) != NULL) {
+		pid_t newpid = runapp(node);
+
+		if (unlikely(newpid == 0)) {
+			ueld_print("Respwan process '%s' failed, remove it from list...\n", node->cmd);
+			delete_node_without_index(node);
+		} else {
+			noderef(node);
+			delete_node_without_index(node);
+			node->pid = newpid;
+			insert(newpid, node);
+			nodeunref(node);
 		}
 	}
 }
 
 void clearpid(pid_t pid)
 {
-	if (pid == 0) {
-		munmap(respawn, length);
-		appssz = 0;
-	}
-
-	for (int i = 0; i < appssz; i++) {
-		if (apps[i].pid == pid) {
-			apps[i].pid = 0;
-			break;
+	if (pid != 0) {
+		delete(pid);
+	} else {
+		disable = 1;
+		for (int i = 0; i < HASHTABLE_FIRST_NODE_SIZE; i++) {
+			if (first_nodes[i] != NULL) {
+				struct respawn_node *node = first_nodes[i];
+				while (node->next != NULL) {
+					struct respawn_node *tmp = node;
+					node = node->next;
+					nodeunref(tmp);
+				}
+				nodeunref(node);
+				first_nodes[i] = NULL;
+			}
 		}
+		munmap(respawn, length);
 	}
 }
