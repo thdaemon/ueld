@@ -20,6 +20,7 @@
 #include "fileio.h"
 #include "tools.h"
 #include "respawn.h"
+#include "log.h"
 
 #include "config.h"
 
@@ -49,6 +50,8 @@ int ueld_reboot(int cmd)
 {
 	int status, vt;
 	pid_t pid;
+
+	ueld_log_close();
 
 	if (getpid() != 1) {
 		ueld_echo("Must run as pid 1");

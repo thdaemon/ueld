@@ -21,6 +21,7 @@
 #include "os/ctrlaltdel.h"
 #include "tools.h"
 #include "respawn.h"
+#include "log.h"
 
 #include "config.h"
 
@@ -80,6 +81,8 @@ int ueld_main(int argc, char* argv[])
 #endif /* LINUX */
 
 	ueld_unblock_signal(SIGUSR1);
+
+	ueld_log_init();
 
 	setevar();
 

@@ -19,6 +19,7 @@
 
 #include "tools.h"
 #include "names.h"
+#include "log.h"
 
 #define MAX_ARGS 32
 
@@ -85,6 +86,8 @@ void ueld_print(char* fmt, ...)
 //#ifdef LINUX
 	close(fd);
 //#endif // LINUX
+
+	ueld_write_log(buff);
 
 	va_end(ap);
 }
