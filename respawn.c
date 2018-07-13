@@ -15,14 +15,6 @@
 #define RESPAWN_FILE "/etc/ueld/respawn.list"
 #define HASHTABLE_FIRST_NODE_SIZE 32
 
-#ifdef __GNUC__
-#define likely(x)	__builtin_expect((x),1)
-#define unlikely(x)	__builtin_expect((x),0)
-#else
-#define likely(x)	(x)
-#define unlikely(x)	(x)
-#endif /* __GNUC__ */
-
 struct respawn_node {
 	int nref;
 	int vt;

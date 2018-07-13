@@ -9,12 +9,34 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include "config.h"
+
 #include "log.h"
 #include "tools.h"
+#include "os/klog.h"
 
 static char block = 1;
 static char proto_type;
-static int logfd;
+int logfd;
+
+ueld_write_log_t ueld_write_log = NULL;
+
+static void ueld_log_write_proto_file(char *msg)
+{
+	if (block)
+		return;
+
+	/* TODO: need current time */
+	write(logfd, msg, strlen(msg));
+}
+
+static void ueld_log_write_proto_klog(char *msg)
+{
+	if (block)
+		return;
+
+	ueld_os_klog_write(msg);
+}
 
 void ueld_log_init()
 {
@@ -42,16 +64,26 @@ void ueld_log_init()
 	if (strcmp(proto, "none") == 0) {
 		proto_type = UELD_LOG_PROTO_NONE;
 		return;
+	} if (strcmp(proto, "klog") == 0) {
+		proto_type = UELD_LOG_PROTO_KLOG;
+		if (ueld_os_klog_open(target) == 0) {
+			ueld_write_log = ueld_log_write_proto_klog;
+			block = 0;
+		} else {
+			ueld_print("log: open '%s' failed (%s).\n", target, strerror(errno));
+		}
+		return;
 	} else if (strcmp(proto, "file") == 0) {
 		proto_type = UELD_LOG_PROTO_FILE;
 
-		logfd = open(target, O_CREAT|O_WRONLY|O_APPEND|O_NOCTTY);
-		if (logfd > 0) {
+		logfd = open(target, O_CREAT|O_WRONLY|O_APPEND|O_NOCTTY, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+		if (logfd >= 0) {
+			ueld_write_log = ueld_log_write_proto_file;
 			block = 0;
 		} else {
-			ueld_print("log: open '%s' failed (%s).", target, strerror(errno));
-			return;
+			ueld_print("log: open '%s' failed (%s).\n", target, strerror(errno));
 		}
+		return;
 	} else {
 		ueld_echo("ueld_log_target proto unknown. Ignore all logs.");
 		return;
@@ -64,20 +96,13 @@ void ueld_log_close()
 	case UELD_LOG_PROTO_FILE:
 		close(logfd);
 		break;
+	case UELD_LOG_PROTO_KLOG:
+		ueld_os_klog_close();
+		break;
 	default:
 		return;
 		break;
 	}
 
 	block = 1;
-}
-
-/* FIXME: multiple proto write functions */
-void ueld_write_log(char *msg)
-{
-	if (block)
-		return;
-
-	/* TODO: need current time */
-	write(logfd, msg, strlen(msg));
 }

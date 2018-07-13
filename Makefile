@@ -11,14 +11,14 @@ PREFIX :=
 INSTALLDIR := /lib/ueld/ueld-$(UELD_VERSION)
 ETCDIR := $(PREFIX)/etc/ueld
 
-OBJS := main.o minit.o fileio.o reboot.o tools.o respawn.o log.o os/$(UELD_OS)/pw.o os/$(UELD_OS)/chvt.o os/$(UELD_OS)/ctrlaltdel.o os/$(UELD_OS)/proc.o os/$(UELD_OS)/mnt.o
+OBJS := main.o minit.o fileio.o reboot.o tools.o respawn.o log.o os/$(UELD_OS)/pw.o os/$(UELD_OS)/chvt.o os/$(UELD_OS)/ctrlaltdel.o os/$(UELD_OS)/proc.o os/$(UELD_OS)/mnt.o os/$(UELD_OS)/klog.o
 CROSS :=
 ifeq "$(CC)" ""
  CC := gcc
 endif
 STRIP := strip
 
-CFLAG := -Wall -O2 -std=c99 $(UELD_OS_CFLAGS)
+CFLAG := -Wall -O2 -std=c99 -Wno-unused-result $(UELD_OS_CFLAGS)
 
 all : ueld
 
@@ -78,7 +78,7 @@ install:
 	@$(MAKE) install_generic_etc_file
 
 defconfig:
-	./mkconfig.sh --no-build-in-minit
+	./mkconfig.sh --no-build-in-minit --enable-log --enable-log-file --enable-os-klog
 
 test:
 	@echo "FIXME: Need a test target"

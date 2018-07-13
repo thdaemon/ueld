@@ -1,6 +1,14 @@
 #ifndef __TOOLS_H_
 #define __TOOLS_H_
 
+#ifdef __GNUC__
+#define likely(x)	__builtin_expect((x),1)
+#define unlikely(x)	__builtin_expect((x),0)
+#else
+#define likely(x)	(x)
+#define unlikely(x)	(x)
+#endif /* __GNUC__ */
+
 void* ueld_signal(int signum, void* handler, int restartsyscall);
 int ueld_unblock_signal(int signum);
 int ueld_block_signal(int signum);
