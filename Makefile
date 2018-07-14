@@ -49,7 +49,7 @@ install_ueld_executable : ueld
 install_generic_etc_file:
 	mkdir -p $(ETCDIR)
 	cp -n etcfiles/generic-$(UELD_OS)/* $(ETCDIR)/
-	cp -n etcfiles/generic/* $(ETCDIR)/
+	cp etcfiles/generic/* $(ETCDIR)/
 	touch $(ETCDIR)/*
 	chmod 755 $(ETCDIR)/*.sh
 

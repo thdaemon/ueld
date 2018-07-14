@@ -15,7 +15,7 @@
 #ifdef CONFIG_ENABLE_OS_KLOG
 int ueld_os_klog_open(char *target)
 {
-	if ((logfd = open("/dev/klog", O_WRONLY|O_NOCTTY)) >= 0) {
+	if ((logfd = open("/dev/kmsg", O_WRONLY|O_NOCTTY)) >= 0) {
 		return 0;
 	} else {
 		return -1;
