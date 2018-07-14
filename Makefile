@@ -78,7 +78,7 @@ install:
 	@$(MAKE) install_generic_etc_file
 
 defconfig:
-	./mkconfig.sh --no-build-in-minit --enable-log --enable-log-file --enable-os-klog
+	./mkconfig.sh --no-build-in-minit --enable-log --enable-log-file --enable-log-syslog --enable-os-klog
 
 test:
 	@echo "FIXME: Need a test target"

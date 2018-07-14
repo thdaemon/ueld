@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <syslog.h>
 
 #include "config.h"
 
@@ -15,13 +16,17 @@
 #include "tools.h"
 #include "os/klog.h"
 
+#ifdef CONFIG_ENABLE_LOG
 static char block = 1;
 static char proto_type;
 int logfd;
+#endif
 
-ueld_write_log_t ueld_write_log = NULL;
+static void ueld_log_write_discard(char *msg) {}
+ueld_write_log_t ueld_write_log = ueld_log_write_discard;
 
-static void ueld_log_write_proto_file(char *msg)
+#ifdef CONFIG_ENABLE_LOG_FILE
+static void ueld_log_write_file(char *msg)
 {
 	if (block)
 		return;
@@ -30,13 +35,93 @@ static void ueld_log_write_proto_file(char *msg)
 	write(logfd, msg, strlen(msg));
 }
 
-static void ueld_log_write_proto_klog(char *msg)
+static void ueld_log_open_file(char *target)
+{
+	proto_type = UELD_LOG_PROTO_FILE;
+
+	logfd = open(target, O_CREAT|O_WRONLY|O_APPEND|O_NOCTTY, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+	if (logfd >= 0) {
+		ueld_write_log = ueld_log_write_file;
+		block = 0;
+	} else {
+		ueld_print("log: open '%s' failed (%s).\n", target, strerror(errno));
+	}
+}
+
+static void ueld_log_close_file()
+{
+	close(logfd);
+}
+#endif
+
+#ifdef CONFIG_ENABLE_OS_KLOG
+static void ueld_log_write_klog(char *msg)
 {
 	if (block)
 		return;
 
 	ueld_os_klog_write(msg);
 }
+
+static void ueld_log_open_klog(char *target)
+{
+	proto_type = UELD_LOG_PROTO_KLOG;
+	if (ueld_os_klog_open(target) == 0) {
+		ueld_write_log = ueld_log_write_klog;
+		block = 0;
+	} else {
+		ueld_print("log: open '%s' failed (%s).\n", target, strerror(errno));
+	}
+}
+#endif
+
+#ifdef CONFIG_ENABLE_LOG_SYSLOG
+static void ueld_log_write_syslog(char *msg)
+{
+	if (block)
+		return;
+
+	syslog(LOG_INFO, "%s", msg);
+}
+
+static void ueld_log_open_syslog(char *target)
+{
+	proto_type = UELD_LOG_PROTO_SYSLOG;
+	openlog("ueld", 0, LOG_DAEMON);
+	ueld_write_log = ueld_log_write_syslog;
+	block = 0;
+}
+
+static void ueld_log_close_syslog()
+{
+	closelog();
+}
+#endif
+
+#ifdef CONFIG_ENABLE_LOG
+static void ueld_log_open_none(char *target)
+{
+	proto_type = UELD_LOG_PROTO_NONE;
+}
+
+struct {
+	char *name;
+	int type;
+	ueld_write_open_t f_open;
+	ueld_write_close_t f_close;
+} ueld_log_protos[] = {
+	{ "none", UELD_LOG_PROTO_NONE, ueld_log_open_none, NULL },
+#ifdef CONFIG_ENABLE_LOG_FILE
+	{ "file", UELD_LOG_PROTO_FILE, ueld_log_open_file, ueld_log_close_file },
+#endif
+#ifdef CONFIG_ENABLE_OS_KLOG
+	{ "klog", UELD_LOG_PROTO_KLOG, ueld_log_open_klog, ueld_os_klog_close },
+#endif
+#ifdef CONFIG_ENABLE_LOG_SYSLOG
+	{ "syslog", UELD_LOG_PROTO_SYSLOG, ueld_log_open_syslog, ueld_log_close_syslog },
+#endif
+	{ NULL, 0, NULL, NULL }
+};
 
 void ueld_log_init()
 {
@@ -61,48 +146,38 @@ void ueld_log_init()
 		return;
 	}
 
-	if (strcmp(proto, "none") == 0) {
-		proto_type = UELD_LOG_PROTO_NONE;
-		return;
-	} if (strcmp(proto, "klog") == 0) {
-		proto_type = UELD_LOG_PROTO_KLOG;
-		if (ueld_os_klog_open(target) == 0) {
-			ueld_write_log = ueld_log_write_proto_klog;
-			block = 0;
-		} else {
-			ueld_print("log: open '%s' failed (%s).\n", target, strerror(errno));
+	int i = 0;
+	while (ueld_log_protos[i].name != NULL) {
+		if (strcmp(proto, ueld_log_protos[i].name) == 0) {
+			ueld_log_protos[i].f_open(target);
+			i = -1;
+			break;
 		}
-		return;
-	} else if (strcmp(proto, "file") == 0) {
-		proto_type = UELD_LOG_PROTO_FILE;
+		i++;
+	}
 
-		logfd = open(target, O_CREAT|O_WRONLY|O_APPEND|O_NOCTTY, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-		if (logfd >= 0) {
-			ueld_write_log = ueld_log_write_proto_file;
-			block = 0;
-		} else {
-			ueld_print("log: open '%s' failed (%s).\n", target, strerror(errno));
-		}
-		return;
-	} else {
+	if (i != -1) {
 		ueld_echo("ueld_log_target proto unknown. Ignore all logs.");
-		return;
 	}
 }
 
 void ueld_log_close()
 {
-	switch (proto_type) {
-	case UELD_LOG_PROTO_FILE:
-		close(logfd);
-		break;
-	case UELD_LOG_PROTO_KLOG:
-		ueld_os_klog_close();
-		break;
-	default:
-		return;
-		break;
+	int i = 0;
+	while (ueld_log_protos[i].name != NULL) {
+		if (ueld_log_protos[i].type == proto_type) {
+			block = 1;
+			ueld_log_protos[i].f_close();
+			break;
+		}
+		i++;
 	}
-
-	block = 1;
 }
+#else
+void ueld_log_init()
+{
+	ueld_echo("log feature not compiled.");
+}
+
+void ueld_log_close() {}
+#endif
