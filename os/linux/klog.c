@@ -26,7 +26,7 @@ int ueld_os_klog_write(char *msg)
 {
 	size_t len = strlen(msg);
 
-	write(logfd, "<5>", 3);
+	write(logfd, "<5>ueld: ", 9);
 	write(logfd, msg, len);
 
 	if (unlikely(msg[len-1] != '\n')) {

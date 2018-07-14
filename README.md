@@ -16,7 +16,7 @@ To compile and install
 
 ```
 $ cd path-to-ueld-src
-$ ./mkconfig.sh
+$ make defconfig
 $ make
 $ sudo make install
 ```
@@ -31,9 +31,9 @@ You can use the `PREFIX` variable to set the root file system. You can use the` 
 
 **Compiletime config**
 
-Before you compile ueld, you need do 'compiletime config' by `./mkconfig.sh`, it will generate a config.h header which includes config macros. Run mkconfig.sh without args will make a header which includes default config.
+Before you compile ueld, you need do 'compiletime config' by `./mkconfig.sh`, it will generate a config header which includes config macros. Run `mkconfig.sh` without args will make a config header which includes blank config. Run `make defconfig` will make a default config header.
 
-For example, if you need not Multi-Init feature, you can
+For example, if you need not Multi-Init feature and disable all log feature, you can run
 
 ```
 $ ./mkconfig.sh --no-build-in-minit
