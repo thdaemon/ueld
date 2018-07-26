@@ -73,9 +73,15 @@ install_sysv_compat:
 
 	@$(MAKE) install_generic_etc_file
 
-install:
-	@$(MAKE) install_ueld_executable
-	@$(MAKE) install_generic_etc_file
+#install:
+#	@$(MAKE) install_ueld_executable
+#	@$(MAKE) install_generic_etc_file
+
+install : all
+	./script/install.sh --prefix $(PREFIX) --system $(UELD_OS)
+
+uninstall:
+	./script/install.sh --prefix $(PREFIX) --uninstall
 
 defconfig:
 	./mkconfig.sh --no-build-in-minit --enable-log --enable-log-file --enable-log-syslog --enable-os-klog

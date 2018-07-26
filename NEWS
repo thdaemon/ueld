@@ -1,6 +1,16 @@
 What's new in ueld
 ==================
 
+0.6.5-unstable 2018-7-26
+========================
+
+Add build-in logger system. Support log to file, kernel message buffer, 
+yslog. Add compile option CONFIG_ENABLE_LOG, CONFIG_ENABLE_LOG_FILE,
+CONFIG_ENABLE_OS_KLOG, CONFIG_ENABLE_LOG_SYSLOG to determine whether you
+want and what you want.
+
+We are also developing a new install script to replace old.
+
 0.6.1-unstable 2018-6-21
 ========================
 
@@ -9,7 +19,7 @@ Now we use hash table to improve respwan performance.
 0.5.1-unstable 2018-6-20
 ========================
 
-before the version ueld_run() URF_CMDLINE parse command line it self by 
+Before the version ueld_run() URF_CMDLINE parse command line it self by 
 only split space. It can not handle the complex situation such as quotes.
 
 Now we have used POSIX wordexp() to parse command line in ueld_run() when
