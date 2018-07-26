@@ -18,6 +18,13 @@ ckev() {
 	exit 0
 }
 
+errquit() {
+	prerr "$*"
+	exit 1
+}
+
+PREFIX=''
+
 while true ; do
 	opt="$1"
 	if [ "$opt" = "" ] || [ "$opt" = "--" ]; then
@@ -30,8 +37,10 @@ while true ; do
 
 		case "${opt}" in
 		--prefix)
-			PREFIX="$1"
-			shift
+			if [ "${1:0:2}" != "--" ]; then
+				PREFIX="$1"
+				shift
+			fi
 			;;
 		--system)
 			OS="$1"
@@ -49,7 +58,6 @@ while true ; do
 	fi
 done
 
-[ -z "${PREFIX}" ] && errquit "--prefix can not be blank"
 [ -z "${OS}" ] && errquit "--system can not be blank"
 
 [ "${UNINSTALL}" = "1" ] && errquit "uninstall is not supported"
@@ -73,10 +81,10 @@ ln -s -f ${INSTALLDIR}/ueldctl ${PREFIX}/sbin/ueldctl
 ckev $?
 
 if [ -d "${PREFIX}/etc/ueld" ]; then
-	prinfo "old /etc/ueld move to /etc/ueld.old"
-	rm -rf /etc/ueld.old
+	prinfo "old ${PREFIX}/etc/ueld move to ${PREFIX}/etc/ueld.old"
+	rm -rf "${PREFIX}/etc/ueld.old"
 	ckev $?
-	mv /etc/ueld /etc/ueld.old
+	mv "${PREFIX}/etc/ueld" "${PREFIX}/etc/ueld.old"
 	ckev $?
 fi
 

@@ -167,7 +167,9 @@ void ueld_log_close()
 	while (ueld_log_protos[i].name != NULL) {
 		if (ueld_log_protos[i].type == proto_type) {
 			block = 1;
-			ueld_log_protos[i].f_close();
+			if (ueld_log_protos[i].f_close) {
+				ueld_log_protos[i].f_close();
+			}
 			break;
 		}
 		i++;
