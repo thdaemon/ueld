@@ -23,6 +23,23 @@ errquit() {
 	exit 1
 }
 
+uninstall_ueld() {
+	rm -rf "$1"
+	ckev $?
+	read -p "Keep configure files? (y/N): " opt
+	[ "$opt" = "" ] && opt="n"
+	if [ "$opt" = "n" -o "$opt" = "N" ]; then
+		rm -rf "$2/etc/ueld"
+		ckev $?
+	fi
+	rm -f "$2/sbin/init"
+	ckev $?
+	rm -f "$2/sbin/ueldctl"
+	ckev $?
+
+	exit 0
+}
+
 PREFIX=''
 
 while true ; do
@@ -60,9 +77,9 @@ done
 
 [ -z "${OS}" ] && errquit "--system can not be blank"
 
-[ "${UNINSTALL}" = "1" ] && errquit "uninstall is not supported"
-
 INSTALLDIR="/lib/ueld/ueld-`cat version`"
+
+[ "${UNINSTALL}" = "1" ] && uninstall_ueld "${INSTALLDIR}" "${PREFIX}"
 
 prinfo "install core files to ${PREFIX}${INSTALLDIR}"
 
