@@ -81,7 +81,7 @@ install : all
 	./scripts/install.sh --prefix $(PREFIX) --system $(UELD_OS)
 
 uninstall:
-	./scripts/install.sh --prefix $(PREFIX) --uninstall
+	./scripts/install.sh --prefix $(PREFIX) --system $(UELD_OS) --uninstall
 
 defconfig:
 	./mkconfig.sh --no-build-in-minit --enable-log --enable-log-file --enable-log-syslog --enable-os-klog
